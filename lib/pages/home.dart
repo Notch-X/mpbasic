@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildDrawer() {
-    return Container(
+    return SizedBox(
       width: 200, // Set the width of the drawer to be smaller
       child: Drawer(
         child: Container(
@@ -57,6 +57,8 @@ class _HomePageState extends State<HomePage> {
                   color: Colors
                       .black, // Set the background color of the header to black
                 ),
+                margin: EdgeInsets.all(0),
+                padding: EdgeInsets.all(16),
                 child: Text(
                   'Navigation',
                   style: TextStyle(
@@ -64,8 +66,6 @@ class _HomePageState extends State<HomePage> {
                     fontSize: 24,
                   ),
                 ),
-                margin: EdgeInsets.all(0),
-                padding: EdgeInsets.all(16),
               ),
               _buildDrawerItem(Icons.home, 'Home'),
               _buildDrawerItem(Icons.control_camera, 'Control'),
@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         SizedBox(height: 15),
-        Container(
+        SizedBox(
           height: 120,
           child: ListView.separated(
             itemCount: categories.length,
@@ -186,7 +186,7 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.all(12),
             child: SvgPicture.asset('assets/icons/Search.svg'),
           ),
-          suffixIcon: Container(
+          suffixIcon: SizedBox(
             width: 100,
             child: IntrinsicHeight(
               child: Row(
@@ -247,14 +247,14 @@ class _HomePageState extends State<HomePage> {
           },
           child: Container(
             margin: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Color(0xffF7F8F8),
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: SvgPicture.asset(
               'assets/icons/settings.svg',
               height: 30,
               width: 30,
-            ),
-            decoration: BoxDecoration(
-              color: Color(0xffF7F8F8),
-              borderRadius: BorderRadius.circular(10),
             ),
           ),
         ),
@@ -305,9 +305,9 @@ class _HomePageState extends State<HomePage> {
       onPressed: () {
         // Handle Home button press
       },
-      child: Icon(Icons.home),
       backgroundColor: Colors.blue,
       shape: CircleBorder(side: BorderSide(color: Colors.black, width: 4)),
+      child: Icon(Icons.home),
     );
   }
 }
