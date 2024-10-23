@@ -31,7 +31,6 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _searchField(),
           SizedBox(height: 40),
           _categoriesSection(),
         ],
@@ -73,7 +72,6 @@ class _HomePageState extends State<HomePage> {
               _buildDrawerItem(Icons.chat, 'AI Chatbot'),
               _buildDrawerItem(Icons.notifications, 'Alerts'),
               Divider(color: Colors.white),
-              _buildDrawerItem(Icons.settings, 'Settings'),
             ],
           ),
         ),
@@ -158,63 +156,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Container _searchField() {
-    return Container(
-      margin: EdgeInsets.only(top: 20, left: 20, right: 20),
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Color(0xff1D1617).withOpacity(0.11),
-            blurRadius: 40,
-            spreadRadius: 0.0,
-          ),
-        ],
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: TextField(
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: EdgeInsets.all(15),
-          hintText: 'Search the app',
-          hintStyle: TextStyle(
-            color: Color(0xffDDDADA),
-            fontSize: 14,
-          ),
-          prefixIcon: Padding(
-            padding: const EdgeInsets.all(12),
-            child: SvgPicture.asset('assets/icons/Search.svg'),
-          ),
-          suffixIcon: SizedBox(
-            width: 100,
-            child: IntrinsicHeight(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  VerticalDivider(
-                    color: Colors.black,
-                    indent: 10,
-                    endIndent: 10,
-                    thickness: 0.1,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SvgPicture.asset('assets/icons/Filter.svg'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          border: OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(15),
-          ),
-        ),
-      ),
-    );
-  }
-
   AppBar appBar() {
     return AppBar(
       title: Text(
@@ -240,25 +181,6 @@ class _HomePageState extends State<HomePage> {
           },
         ),
       ),
-      actions: [
-        GestureDetector(
-          onTap: () {
-            // Add navigation or custom functionality here
-          },
-          child: Container(
-            margin: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Color(0xffF7F8F8),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: SvgPicture.asset(
-              'assets/icons/settings.svg',
-              height: 30,
-              width: 30,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
