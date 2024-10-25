@@ -1,56 +1,111 @@
 import 'package:flutter/material.dart';
-import 'package:mpbasic/pages/analytics.dart';
+import 'package:mpbasic/pages/home.dart';
+import 'package:mpbasic/pages/process.dart';
 import 'package:mpbasic/pages/ai.dart'; 
-import 'package:mpbasic/pages/home.dart'; 
-import 'package:mpbasic/pages/alerts.dart'; // Import HomePage
+import 'package:mpbasic/pages/alerts.dart';
 
-class ProcessPage extends StatefulWidget {
-  const ProcessPage({super.key});
+class AnalyticsPage extends StatefulWidget {
+  const AnalyticsPage({super.key});
 
   @override
-  State<ProcessPage> createState() => _ProcessPageState();
+  State<AnalyticsPage> createState() => _AnalyticsPageState();
 }
 
-class _ProcessPageState extends State<ProcessPage> {
-  int _selectedModule = 0;
+class _AnalyticsPageState extends State<AnalyticsPage>
+    with SingleTickerProviderStateMixin {
+  int _selectedSection = 0;
   int _selectedSubPage = 0;
+  TabController? _tabController;
 
-  final List<Map<String, dynamic>> _modules = [
+  final List<Map<String, dynamic>> _sections = [
     {
-      'title': 'Module 1: Dosing Process',
+      'title': 'OEE', // Tab label
+      'header': 'Overall Equipment Effectiveness', // Header text
       'subpages': [
-        {'title': 'Overview', 'icon': Icons.assignment},
-        {'title': 'Parameters', 'icon': Icons.tune},
+        {
+          'title': 'Availability',
+          'icon': Icons.access_time,
+        },
+        {
+          'title': 'Performance',
+          'icon': Icons.speed,
+        },
+        {
+          'title': 'Quality',
+          'icon': Icons.verified,
+        },
       ]
     },
     {
-      'title': 'Module 2: Mixing Process',
+      'title': 'Sustainability',
+      'header': 'Sustainability',
       'subpages': [
-        {'title': 'Overview', 'icon': Icons.assignment},
-        {'title': 'Parameters', 'icon': Icons.tune},
+        {
+          'title': 'Electrical Power',
+          'icon': Icons.electrical_services,
+        },
+        {
+          'title': 'Water Usage',
+          'icon': Icons.water,
+        },
+        {
+          'title': 'Pressurized Air',
+          'icon': Icons.air,
+        },
       ]
     },
     {
-      'title': 'Module 3: Brewing Process',
+      'title': 'Trends',
+      'header': 'Trends',
       'subpages': [
-        {'title': 'Overview', 'icon': Icons.assignment},
-        {'title': 'Parameters', 'icon': Icons.tune},
-      ]
-    },
-    {
-      'title': 'Module 4: Filling Process',
-      'subpages': [
-        {'title': 'Overview', 'icon': Icons.assignment},
-        {'title': 'Parameters', 'icon': Icons.tune},
+        {
+          'title': 'Temp/PH',
+          'icon': Icons.thermostat,
+        },
+        {
+          'title': 'Total Water Used',
+          'icon': Icons.water_damage,
+        },
+        {
+          'title': 'Pressurized Air',
+          'icon': Icons.air,
+        },
+        {
+          'title': 'Conductivity & TDS',
+          'icon': Icons.science,
+        },
+        {
+          'title': 'Power-Meter',
+          'icon': Icons.bolt,
+        },
+        {
+          'title': 'Overall Equipment Effectiveness',
+          'icon': Icons.assessment,
+        },
       ]
     },
   ];
 
-  void _navigateToPage(String route, BuildContext context) {
-    // Close the drawer if it's open
-    Navigator.pop(context);
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: _sections.length, vsync: this);
+    _tabController!.addListener(() {
+      setState(() {
+        _selectedSection = _tabController!.index;
+        _selectedSubPage = 0;
+      });
+    });
+  }
 
-    // Navigate to the selected page
+  @override
+  void dispose() {
+    _tabController!.dispose();
+    super.dispose();
+  }
+
+  void _navigateToPage(String route, BuildContext context) {
+    Navigator.pop(context);
     switch (route) {
       case 'Home':
         Navigator.pushAndRemoveUntil(
@@ -65,16 +120,16 @@ class _ProcessPageState extends State<ProcessPage> {
           MaterialPageRoute(builder: (context) => const ProcessPage()),
         );
         break;
-      case 'Analytics':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AnalyticsPage()),
-        );
-        break;
       case 'Chat':
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AIChatbotPage()),
+        );
+        break;
+      case 'Analytics':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AnalyticsPage()),
         );
         break;
        case 'Alerts':
@@ -83,8 +138,30 @@ class _ProcessPageState extends State<ProcessPage> {
           MaterialPageRoute(builder: (context) => const AlertPage()),
         );
         break;
-      // Add more cases for other pages if needed
     }
+  }
+
+  void _showFullScreenDiagram(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: Container(
+            color: Colors.white,
+            child: Center(
+              child: Text(
+                'Analytics Diagram for ${_sections[_selectedSection]['header']}\nSubpage: ${_sections[_selectedSection]['subpages'][_selectedSubPage]['title']}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF1B4D4C),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -92,7 +169,7 @@ class _ProcessPageState extends State<ProcessPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _modules[_selectedModule]['title'],
+          _sections[_selectedSection]['header'],
           style: const TextStyle(
             color: Colors.white,
             fontSize: 20,
@@ -110,12 +187,19 @@ class _ProcessPageState extends State<ProcessPage> {
             },
           ),
         ),
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white.withOpacity(0.6),
+          indicatorColor: Colors.white,
+          tabs:
+              _sections.map((section) => Tab(text: section['title'])).toList(),
+        ),
       ),
       backgroundColor: const Color(0xFFF5F9F9),
       drawer: _buildDrawer(),
       body: Column(
         children: [
-          _buildModuleSelector(),
           _buildSubPageTabs(),
           Expanded(
             child: _buildPageContent(),
@@ -128,58 +212,16 @@ class _ProcessPageState extends State<ProcessPage> {
     );
   }
 
-  Widget _buildModuleSelector() {
-    return Container(
-      height: 60,
-      color: const Color(0xFF1B4D4C),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _modules.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedModule = index;
-                _selectedSubPage = 0;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: _selectedModule == index
-                        ? const Color(0xFF4FB3AF)
-                        : Colors.transparent,
-                    width: 3,
-                  ),
-                ),
-              ),
-              child: Text(
-                'Module ${index + 1}',
-                style: TextStyle(
-                  color: _selectedModule == index
-                      ? const Color(0xFF4FB3AF)
-                      : Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildSubPageTabs() {
+    List<Map<String, dynamic>> currentSubpages =
+        _sections[_selectedSection]['subpages'];
     return Container(
       height: 50,
       color: Colors.white,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: _modules[_selectedModule]['subpages'].map<Widget>((subpage) {
-          final index = _modules[_selectedModule]['subpages'].indexOf(subpage);
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: currentSubpages.length,
+        itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () {
               setState(() {
@@ -187,7 +229,7 @@ class _ProcessPageState extends State<ProcessPage> {
               });
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 border: Border(
@@ -203,7 +245,7 @@ class _ProcessPageState extends State<ProcessPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    subpage['icon'],
+                    currentSubpages[index]['icon'],
                     color: _selectedSubPage == index
                         ? const Color(0xFF4FB3AF)
                         : Colors.grey,
@@ -211,7 +253,7 @@ class _ProcessPageState extends State<ProcessPage> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    subpage['title'],
+                    currentSubpages[index]['title'],
                     style: TextStyle(
                       color: _selectedSubPage == index
                           ? const Color(0xFF4FB3AF)
@@ -223,27 +265,33 @@ class _ProcessPageState extends State<ProcessPage> {
               ),
             ),
           );
-        }).toList(),
+        },
       ),
     );
   }
 
   Widget _buildPageContent() {
-    // Example process diagram for each module
+    Map<String, dynamic> currentSubpage =
+        _sections[_selectedSection]['subpages'][_selectedSubPage];
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildProcessDiagram(),
+          GestureDetector(
+            onTap: () => _showFullScreenDiagram(context),
+            child: _buildAnalyticsDiagram(),
+          ),
           const SizedBox(height: 20),
-          _buildProcessDetails(),
+          _buildAnalyticsDetails(currentSubpage),
         ],
       ),
     );
   }
 
-  Widget _buildProcessDiagram() {
+  Widget _buildAnalyticsDiagram() {
+    Map<String, dynamic> currentSubpage =
+        _sections[_selectedSection]['subpages'][_selectedSubPage];
     return Container(
       width: double.infinity,
       height: 300,
@@ -260,7 +308,7 @@ class _ProcessPageState extends State<ProcessPage> {
       ),
       child: Center(
         child: Text(
-          'Process Diagram for ${_modules[_selectedModule]['title']}\nSubpage: ${_modules[_selectedModule]['subpages'][_selectedSubPage]['title']}',
+          'Analytics Diagram for ${_sections[_selectedSection]['header']}\nSubpage: ${currentSubpage['title']}',
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 16,
@@ -271,7 +319,7 @@ class _ProcessPageState extends State<ProcessPage> {
     );
   }
 
-  Widget _buildProcessDetails() {
+  Widget _buildAnalyticsDetails(Map<String, dynamic> subpage) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -289,18 +337,23 @@ class _ProcessPageState extends State<ProcessPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Process Details',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1B4D4C),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'This is the ${_modules[_selectedModule]['subpages'][_selectedSubPage]['title']} view for ${_modules[_selectedModule]['title']}',
-            style: TextStyle(fontSize: 16),
+          Row(
+            children: [
+              Icon(
+                subpage['icon'],
+                color: const Color(0xFF1B4D4C),
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                subpage['title'],
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1B4D4C),
+                ),
+              ),
+            ],
           ),
         ],
       ),

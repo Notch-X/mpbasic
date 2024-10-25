@@ -1,36 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:mpbasic/models/category_model.dart';
 import 'package:mpbasic/pages/analytics.dart';
 import 'package:mpbasic/pages/process.dart';
-import 'package:mpbasic/pages/ai.dart'; 
-import 'package:mpbasic/pages/alerts.dart'; // Adding page
+import 'package:mpbasic/pages/home.dart'; 
+import 'package:mpbasic/pages/ai.dart'; // Adding page
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class AlertPage extends StatefulWidget {
+  const AlertPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<AlertPage> createState() => _AlertPageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  List<CategoryModel> categories = [];
+class _AlertPageState extends State<AlertPage> {
 
   @override
   void initState() {
     super.initState();
-    _getCategories();
+
   }
 
-  void _getCategories() {
-    categories = CategoryModel.getCategories();
-  }
+ 
 
   // Navigation handler for both drawer and bottom bar
   void _navigateToPage(String route, BuildContext context) {
-    // Close the drawer if it's open
     Navigator.pop(context);
-
-    // Navigate to the selected page
     switch (route) {
       case 'Home':
         Navigator.pushAndRemoveUntil(
@@ -57,13 +50,12 @@ class _HomePageState extends State<HomePage> {
           MaterialPageRoute(builder: (context) => const AIChatbotPage()),
         );
         break;
-       case 'Alerts':
+      case 'Alerts':
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AlertPage()),
         );
         break;
-      // Add more cases for other pages if needed
     }
   }
 
@@ -159,7 +151,7 @@ class _HomePageState extends State<HomePage> {
   AppBar appBar() {
     return AppBar(
       title: const Text(
-        'Saline Solution Production',
+        'Alerts',
         style: TextStyle(
           color: Colors.white,
           fontSize: 20,
