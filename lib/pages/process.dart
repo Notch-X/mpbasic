@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mpbasic/pages/home.dart';
+import 'package:mpbasic/pages/ai.dart';
+import 'package:mpbasic/pages/alerts.dart';
 import 'package:mpbasic/pages/analytics.dart';
-import 'package:mpbasic/pages/ai.dart'; 
-import 'package:mpbasic/pages/home.dart'; 
-import 'package:mpbasic/pages/alerts.dart'; // Import HomePage
+import 'package:mpbasic/pages/manual_mode.dart';
+
 
 class ProcessPage extends StatefulWidget {
   const ProcessPage({super.key});
@@ -12,88 +14,18 @@ class ProcessPage extends StatefulWidget {
 }
 
 class _ProcessPageState extends State<ProcessPage> {
-  int _selectedModule = 0;
-  int _selectedSubPage = 0;
+  String _status = "";
+  bool _isAutoMode = false;
+  bool _isStopped = true;
 
-  final List<Map<String, dynamic>> _modules = [
-    {
-      'title': 'Module 1: Dosing Process',
-      'subpages': [
-        {'title': 'Overview', 'icon': Icons.assignment},
-        {'title': 'Parameters', 'icon': Icons.tune},
-      ]
-    },
-    {
-      'title': 'Module 2: Mixing Process',
-      'subpages': [
-        {'title': 'Overview', 'icon': Icons.assignment},
-        {'title': 'Parameters', 'icon': Icons.tune},
-      ]
-    },
-    {
-      'title': 'Module 3: Brewing Process',
-      'subpages': [
-        {'title': 'Overview', 'icon': Icons.assignment},
-        {'title': 'Parameters', 'icon': Icons.tune},
-      ]
-    },
-    {
-      'title': 'Module 4: Filling Process',
-      'subpages': [
-        {'title': 'Overview', 'icon': Icons.assignment},
-        {'title': 'Parameters', 'icon': Icons.tune},
-      ]
-    },
-  ];
-
-  void _navigateToPage(String route, BuildContext context) {
-    // Close the drawer if it's open
-    Navigator.pop(context);
-
-    // Navigate to the selected page
-    switch (route) {
-      case 'Home':
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-          (route) => false,
-        );
-        break;
-      case 'Process':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ProcessPage()),
-        );
-        break;
-      case 'Analytics':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AnalyticsPage()),
-        );
-        break;
-      case 'Chat':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AIChatbotPage()),
-        );
-        break;
-       case 'Alerts':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AlertPage()),
-        );
-        break;
-      // Add more cases for other pages if needed
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          _modules[_selectedModule]['title'],
-          style: const TextStyle(
+        title: const Text(
+          'Overview of System',
+          style: TextStyle(
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -102,208 +34,180 @@ class _ProcessPageState extends State<ProcessPage> {
         backgroundColor: const Color(0xFF1B4D4C),
         elevation: 0.0,
         centerTitle: true,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
-        ),
       ),
-      backgroundColor: const Color(0xFFF5F9F9),
       drawer: _buildDrawer(),
-      body: Column(
-        children: [
-          _buildModuleSelector(),
-          _buildSubPageTabs(),
-          Expanded(
-            child: _buildPageContent(),
-          ),
-        ],
-      ),
+      body: _buildOverallSystemPage(),
       bottomNavigationBar: _buildBottomAppBar(),
       floatingActionButton: _buildHomeButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
-  Widget _buildModuleSelector() {
-    return Container(
-      height: 60,
-      color: const Color(0xFF1B4D4C),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _modules.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedModule = index;
-                _selectedSubPage = 0;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: _selectedModule == index
-                        ? const Color(0xFF4FB3AF)
-                        : Colors.transparent,
-                    width: 3,
+  Widget _buildOverallSystemPage() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            height: 300,
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text(
+                'Overall System Diagram',
+                style: TextStyle(fontSize: 20, color: Color(0xFF1B4D4C)),
+              ),
+            ),
+          ),
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 3 - 24,
+                  child: _buildControlButtonWithLED(
+                    label: 'Auto',
+                    color: Colors.green,
+                    isActive: _isAutoMode,
+                    onPressed: () {
+                      setState(() {
+                        _isAutoMode = true;
+                        _isStopped = false;
+                        _status = "System is running in Auto mode";
+                      });
+                    },
                   ),
                 ),
-              ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 3 - 24,
+                  child: _buildControlButtonWithLED(
+                    label: 'Stop',
+                    color: Colors.red,
+                    isActive: _isStopped,
+                    onPressed: () {
+                      setState(() {
+                        _isAutoMode = false;
+                        _isStopped = true;
+                        _status = "System stopped running";
+                      });
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 3 - 24,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.5),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ManualModePage(
+                                selectedModule: 0,
+                              
+                                onModuleChanged: (int moduleIndex) {
+                                },
+                                onStatusChanged: (String newStatus) {
+                                  setState(() {
+                                    _status = newStatus;
+                                  });
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          minimumSize: Size(
+                            MediaQuery.of(context).size.width / 3 - 24,
+                            48,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Manual',
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_status.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.all(20),
               child: Text(
-                'Module ${index + 1}',
-                style: TextStyle(
-                  color: _selectedModule == index
-                      ? const Color(0xFF4FB3AF)
-                      : Colors.white,
+                _status,
+                style: const TextStyle(
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSubPageTabs() {
-    return Container(
-      height: 50,
-      color: Colors.white,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: _modules[_selectedModule]['subpages'].map<Widget>((subpage) {
-          final index = _modules[_selectedModule]['subpages'].indexOf(subpage);
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedSubPage = index;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: _selectedSubPage == index
-                        ? const Color(0xFF4FB3AF)
-                        : Colors.transparent,
-                    width: 2,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    subpage['icon'],
-                    color: _selectedSubPage == index
-                        ? const Color(0xFF4FB3AF)
-                        : Colors.grey,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    subpage['title'],
-                    style: TextStyle(
-                      color: _selectedSubPage == index
-                          ? const Color(0xFF4FB3AF)
-                          : Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildPageContent() {
-    // Example process diagram for each module
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildProcessDiagram(),
-          const SizedBox(height: 20),
-          _buildProcessDetails(),
         ],
       ),
     );
   }
 
-  Widget _buildProcessDiagram() {
-    return Container(
-      width: double.infinity,
-      height: 300,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          'Process Diagram for ${_modules[_selectedModule]['title']}\nSubpage: ${_modules[_selectedModule]['subpages'][_selectedSubPage]['title']}',
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Color(0xFF1B4D4C),
+  Widget _buildControlButtonWithLED({
+    required String label,
+    required Color color,
+    required bool isActive,
+    required VoidCallback onPressed,
+  }) {
+    return Column(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: isActive ? color : Colors.grey,
+            shape: BoxShape.circle,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildProcessDetails() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Process Details',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1B4D4C),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            minimumSize: Size(
+              MediaQuery.of(context).size.width / 3 - 24,
+              48,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            'This is the ${_modules[_selectedModule]['subpages'][_selectedSubPage]['title']} view for ${_modules[_selectedModule]['title']}',
-            style: TextStyle(fontSize: 16),
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 16, color: Colors.white),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -355,6 +259,7 @@ class _ProcessPageState extends State<ProcessPage> {
               _buildDrawerItem(Icons.analytics, 'Analytics'),
               _buildDrawerItem(Icons.chat_bubble, 'AI ChatBot'),
               _buildDrawerItem(Icons.notifications, 'Alerts'),
+              Divider(color: Colors.white.withOpacity(0.2)),
             ],
           ),
         ),
@@ -388,7 +293,7 @@ class _ProcessPageState extends State<ProcessPage> {
           children: <Widget>[
             _buildBottomNavItem(Icons.science, 'Process'),
             _buildBottomNavItem(Icons.analytics, 'Analytics'),
-            const SizedBox(width: 40), // Space for FAB
+            const SizedBox(width: 40),
             _buildBottomNavItem(Icons.chat_bubble, 'Chat'),
             _buildBottomNavItem(Icons.notifications, 'Alerts'),
           ],
@@ -423,14 +328,7 @@ class _ProcessPageState extends State<ProcessPage> {
 
   Widget _buildHomeButton() {
     return FloatingActionButton(
-      onPressed: () {
-        // If not on home page, navigate to home
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-          (route) => false,
-        );
-      },
+      onPressed: () => _navigateToPage('Home', context),
       elevation: 2,
       backgroundColor: const Color(0xFF4FB3AF),
       shape: const CircleBorder(
@@ -445,5 +343,42 @@ class _ProcessPageState extends State<ProcessPage> {
         size: 28,
       ),
     );
+  }
+
+  void _navigateToPage(String route, BuildContext context) {
+    Navigator.pop(context);
+    switch (route) {
+      case 'Home':
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+          (route) => false,
+        );
+        break;
+      case 'Process':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProcessPage()),
+        );
+        break;
+      case 'Chat':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AIChatbotPage()),
+        );
+        break;
+      case 'Analytics':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AnalyticsPage()),
+        );
+        break;
+      case 'Alerts':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AlertPage()),
+        );
+        break;
+    }
   }
 }

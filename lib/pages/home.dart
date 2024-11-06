@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mpbasic/models/category_model.dart';
 import 'package:mpbasic/pages/analytics.dart';
 import 'package:mpbasic/pages/process.dart';
-import 'package:mpbasic/pages/ai.dart'; 
+import 'package:mpbasic/pages/ai.dart';
 import 'package:mpbasic/pages/alerts.dart'; // Adding page
 
 class HomePage extends StatefulWidget {
@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
           MaterialPageRoute(builder: (context) => const AIChatbotPage()),
         );
         break;
-       case 'Alerts':
+      case 'Alerts':
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AlertPage()),
@@ -243,7 +243,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: const Color(0xFF4FB3AF),
       shape: const CircleBorder(
         side: BorderSide(
-          color: Color(0xFF1B4D4C),
+          color: Color.fromARGB(255, 4, 20, 19),
           width: 3,
         ),
       ),
