@@ -257,7 +257,7 @@ class _HomePageState extends State<HomePage> {
             _buildGreenPlanViewer(),
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
+        floatingActionButton: FloatingActionButton(
           onPressed: () {
             setState(() {
               _showGreenPlan = true;
@@ -265,8 +265,7 @@ class _HomePageState extends State<HomePage> {
             });
           },
           backgroundColor: Colors.green,
-          icon: const Icon(Icons.eco),
-          label: const Text('Green Plan'),
+          child: const Icon(Icons.eco),
         ),
         bottomNavigationBar:
             BottomAppBarWidget(navigateToPage: _navigateToPage),
