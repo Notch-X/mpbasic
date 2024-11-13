@@ -7,6 +7,7 @@ import 'package:mpbasic/pages/analytics.dart';
 import 'package:mpbasic/pages/process.dart';
 import 'package:mpbasic/pages/ai.dart';
 import 'package:mpbasic/pages/alerts.dart';
+import 'dashboard_widget.dart'; // Import the DashboardWidget
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -244,11 +245,14 @@ class _HomePageState extends State<HomePage> {
         body: Stack(
           children: [
             const BackgroundWidget(),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                SizedBox(height: 100),
-              ],
+            SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  SizedBox(height: 100),
+                  DashboardWidget(), // Add the DashboardWidget here
+                ],
+              ),
             ),
             _buildGreenPlanViewer(),
           ],
