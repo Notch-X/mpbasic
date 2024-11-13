@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:mpbasic/models/category_model.dart';
+import 'package:mpbasic/pages/UI/UX/background_widget.dart';
+import 'package:mpbasic/pages/UI/UX/bottom_app_bar_widget.dart';
+import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
 import 'package:mpbasic/pages/analytics.dart';
 import 'package:mpbasic/pages/process.dart';
-import 'package:mpbasic/pages/home.dart'; 
-import 'package:mpbasic/pages/alerts.dart'; // Adding page
+import 'package:mpbasic/pages/home.dart';
+import 'package:mpbasic/pages/alerts.dart';
+
+
 
 class AIChatbotPage extends StatefulWidget {
   const AIChatbotPage({super.key});
@@ -14,6 +19,7 @@ class AIChatbotPage extends StatefulWidget {
 
 class _AIChatbotPageState extends State<AIChatbotPage> {
   List<CategoryModel> categories = [];
+  
 
   @override
   void initState() {
@@ -25,9 +31,9 @@ class _AIChatbotPageState extends State<AIChatbotPage> {
     categories = CategoryModel.getCategories();
   }
 
-  // Navigation handler for both drawer and bottom bar
   void _navigateToPage(String route, BuildContext context) {
     Navigator.pop(context);
+
     switch (route) {
       case 'Home':
         Navigator.pushAndRemoveUntil(
@@ -54,7 +60,7 @@ class _AIChatbotPageState extends State<AIChatbotPage> {
           MaterialPageRoute(builder: (context) => const AIChatbotPage()),
         );
         break;
-       case 'Alerts':
+      case 'Alerts':
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AlertPage()),
@@ -65,90 +71,37 @@ class _AIChatbotPageState extends State<AIChatbotPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appBar(),
-      backgroundColor: const Color(0xFFF5F9F9),
-      drawer: _buildDrawer(),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          SizedBox(height: 40),
-          // Add your home page content here
-        ],
-      ),
-      bottomNavigationBar: _buildBottomAppBar(),
-      floatingActionButton: _buildHomeButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
-  }
-
-  Widget _buildDrawer() {
-    return SizedBox(
-      width: 240,
-      child: Drawer(
-        child: Container(
-          color: const Color(0xFF1B4D4C),
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                decoration: const BoxDecoration(
-                  color: Color(0xFF1B4D4C),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      
+      home: Scaffold(
+        appBar: appBar(),
+        extendBodyBehindAppBar: true,
+        backgroundColor: Colors.black,
+        drawer: DrawerWidget(navigateToPage: _navigateToPage),
+        body: Stack(
+          children: [
+            const BackgroundWidget(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 100),
+                // Add your AI chatbot content here
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Container(
+                        // Add your chat interface here
+                        ),
+                  ),
                 ),
-                margin: EdgeInsets.zero,
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 60,
-                      width: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.water_drop,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'EcoSaline',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              _buildDrawerItem(Icons.home, 'Home'),
-              _buildDrawerItem(Icons.science, 'Process'),
-              _buildDrawerItem(Icons.analytics, 'Analytics'),
-              _buildDrawerItem(Icons.chat_bubble, 'AI ChatBot'),
-              _buildDrawerItem(Icons.notifications, 'Alerts'),
-              Divider(color: Colors.white.withOpacity(0.2)),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
+        bottomNavigationBar:
+            BottomAppBarWidget(navigateToPage: _navigateToPage),
       ),
-    );
-  }
-
-  ListTile _buildDrawerItem(IconData icon, String title) {
-    return ListTile(
-      leading: Icon(icon, color: const Color(0xFF4FB3AF)),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
-      ),
-      onTap: () => _navigateToPage(title, context),
     );
   }
 
@@ -158,11 +111,11 @@ class _AIChatbotPageState extends State<AIChatbotPage> {
         'AI ChatBot',
         style: TextStyle(
           color: Colors.white,
-          fontSize: 20,
+          fontSize: 22,
           fontWeight: FontWeight.bold,
         ),
       ),
-      backgroundColor: const Color(0xFF1B4D4C),
+      backgroundColor: Colors.transparent,
       elevation: 0.0,
       centerTitle: true,
       leading: Builder(
@@ -176,77 +129,6 @@ class _AIChatbotPageState extends State<AIChatbotPage> {
             Scaffold.of(context).openDrawer();
           },
         ),
-      ),
-    );
-  }
-
-  Widget _buildBottomAppBar() {
-    return BottomAppBar(
-      color: const Color(0xFF1B4D4C),
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 6.0,
-      child: SizedBox(
-        height: 60,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            _buildBottomNavItem(Icons.science, 'Process'),
-            _buildBottomNavItem(Icons.analytics, 'Analytics'),
-            const SizedBox(width: 40), // Space for FAB
-            _buildBottomNavItem(Icons.chat_bubble, 'Chat'),
-            _buildBottomNavItem(Icons.notifications, 'Alerts'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavItem(IconData icon, String label) {
-    return GestureDetector(
-      onTap: () => _navigateToPage(label, context),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: const Color(0xFF4FB3AF), size: 24),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Color(0xFF4FB3AF),
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHomeButton() {
-    return FloatingActionButton(
-      onPressed: () {
-        // If not on home page, navigate to home
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-          (route) => false,
-        );
-      },
-      elevation: 2,
-      backgroundColor: const Color(0xFF4FB3AF),
-      shape: const CircleBorder(
-        side: BorderSide(
-          color: Color(0xFF1B4D4C),
-          width: 3,
-        ),
-      ),
-      child: const Icon(
-        Icons.home,
-        color: Colors.white,
-        size: 28,
       ),
     );
   }

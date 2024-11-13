@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mpbasic/pages/UI/UX/background_widget.dart';
+import 'package:mpbasic/pages/UI/UX/bottom_app_bar_widget.dart';
+import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
 import 'package:mpbasic/pages/home.dart';
 import 'package:mpbasic/pages/ai.dart';
 import 'package:mpbasic/pages/alerts.dart';
@@ -18,28 +21,44 @@ class _ProcessPageState extends State<ProcessPage> {
   bool _isAutoMode = false;
   bool _isStopped = true;
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text(
           'Overview of System',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 20,
+            fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: const Color(0xFF1B4D4C),
+        backgroundColor: Colors.transparent,
         elevation: 0.0,
         centerTitle: true,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(
+              Icons.menu,
+              color: Colors.white,
+              size: 28,
+            ),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+        ),
       ),
-      drawer: _buildDrawer(),
-      body: _buildOverallSystemPage(),
-      bottomNavigationBar: _buildBottomAppBar(),
-      floatingActionButton: _buildHomeButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      drawer: DrawerWidget(navigateToPage: _navigateToPage),
+      body: Stack(
+        children: [
+          const BackgroundWidget(),
+          _buildOverallSystemPage(),
+        ],
+      ),
+      bottomNavigationBar: BottomAppBarWidget(navigateToPage: _navigateToPage),
     );
   }
 
@@ -48,25 +67,34 @@ class _ProcessPageState extends State<ProcessPage> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
+          const SizedBox(height: 100), // Add padding for AppBar
           Container(
             width: double.infinity,
             height: 300,
             margin: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.2),
+                width: 1,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
             child: const Center(
               child: Text(
                 'Overall System Diagram',
-                style: TextStyle(fontSize: 20, color: Color(0xFF1B4D4C)),
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -124,9 +152,7 @@ class _ProcessPageState extends State<ProcessPage> {
                             MaterialPageRoute(
                               builder: (context) => ManualModePage(
                                 selectedModule: 0,
-                              
-                                onModuleChanged: (int moduleIndex) {
-                                },
+                                onModuleChanged: (int moduleIndex) {},
                                 onStatusChanged: (String newStatus) {
                                   setState(() {
                                     _status = newStatus;
@@ -165,6 +191,7 @@ class _ProcessPageState extends State<ProcessPage> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -211,140 +238,6 @@ class _ProcessPageState extends State<ProcessPage> {
     );
   }
 
-  Widget _buildDrawer() {
-    return SizedBox(
-      width: 240,
-      child: Drawer(
-        child: Container(
-          color: const Color(0xFF1B4D4C),
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              DrawerHeader(
-                decoration: const BoxDecoration(
-                  color: Color(0xFF1B4D4C),
-                ),
-                margin: EdgeInsets.zero,
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 60,
-                      width: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.water_drop,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'EcoSaline',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              _buildDrawerItem(Icons.home, 'Home'),
-              _buildDrawerItem(Icons.science, 'Process'),
-              _buildDrawerItem(Icons.analytics, 'Analytics'),
-              _buildDrawerItem(Icons.chat_bubble, 'AI ChatBot'),
-              _buildDrawerItem(Icons.notifications, 'Alerts'),
-              Divider(color: Colors.white.withOpacity(0.2)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  ListTile _buildDrawerItem(IconData icon, String title) {
-    return ListTile(
-      leading: Icon(icon, color: const Color(0xFF4FB3AF)),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
-      ),
-      onTap: () => _navigateToPage(title, context),
-    );
-  }
-
-  Widget _buildBottomAppBar() {
-    return BottomAppBar(
-      color: const Color(0xFF1B4D4C),
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 6.0,
-      child: SizedBox(
-        height: 60,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            _buildBottomNavItem(Icons.science, 'Process'),
-            _buildBottomNavItem(Icons.analytics, 'Analytics'),
-            const SizedBox(width: 40),
-            _buildBottomNavItem(Icons.chat_bubble, 'Chat'),
-            _buildBottomNavItem(Icons.notifications, 'Alerts'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavItem(IconData icon, String label) {
-    return GestureDetector(
-      onTap: () => _navigateToPage(label, context),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: const Color(0xFF4FB3AF), size: 24),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Color(0xFF4FB3AF),
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHomeButton() {
-    return FloatingActionButton(
-      onPressed: () => _navigateToPage('Home', context),
-      elevation: 2,
-      backgroundColor: const Color(0xFF4FB3AF),
-      shape: const CircleBorder(
-        side: BorderSide(
-          color: Color(0xFF1B4D4C),
-          width: 3,
-        ),
-      ),
-      child: const Icon(
-        Icons.home,
-        color: Colors.white,
-        size: 28,
-      ),
-    );
-  }
-
   void _navigateToPage(String route, BuildContext context) {
     Navigator.pop(context);
     switch (route) {
@@ -362,6 +255,7 @@ class _ProcessPageState extends State<ProcessPage> {
         );
         break;
       case 'Chat':
+      case 'AI ChatBot':
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AIChatbotPage()),

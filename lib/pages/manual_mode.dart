@@ -1,5 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:mpbasic/pages/UI/UX/background_widget.dart';
+import 'package:mpbasic/pages/controls/control_buttons.dart';
+import 'package:mpbasic/pages/controls/led_with_label.dart';
+import 'package:mpbasic/pages/controls/module_page.dart';
+import 'package:mpbasic/pages/controls/module_card.dart';
+
 
 class ManualModePage extends StatefulWidget {
   final int selectedModule;
@@ -31,41 +37,41 @@ class _ManualModePageState extends State<ManualModePage>
       'title': 'Water Supply',
       'moduleNumber': 1,
       'subpages': [
-        {'title': 'Overview', 'icon': Icons.dashboard_outlined},
-        {'title': 'Water Level', 'icon': Icons.water},
+        {'title': 'Overview'},
+        {'title': 'Water Level'},
       ]
     },
     {
       'title': 'Dosing Process',
       'moduleNumber': 2,
       'subpages': [
-        {'title': 'Diluent', 'icon': Icons.science},
-        {'title': 'Salt', 'icon': Icons.science},
-        {'title': 'Water Level', 'icon': Icons.water},
+        {'title': 'Diluent'},
+        {'title': 'Stock'},
+        {'title': 'Water Level'},
       ]
     },
     {
       'title': 'Mixer Process',
       'moduleNumber': 3,
       'subpages': [
-        {'title': 'Overview', 'icon': Icons.dashboard_outlined},
-        {'title': 'Water Level', 'icon': Icons.water},
+        {'title': 'Overview'},
+        {'title': 'Water Level'},
       ]
     },
     {
       'title': 'Filling Process',
       'moduleNumber': 4,
       'subpages': [
-        {'title': 'Overview', 'icon': Icons.dashboard_outlined},
-        {'title': 'Water Level', 'icon': Icons.water},
+        {'title': 'Overview'},
+        {'title': 'Water Level'},
       ]
     },
     {
       'title': 'Waste Tank',
       'moduleNumber': 5,
       'subpages': [
-        {'title': 'Overview', 'icon': Icons.dashboard_outlined},
-        {'title': 'Water Level', 'icon': Icons.water},
+        {'title': 'Overview'},
+        {'title': 'Water Level'},
       ]
     },
   ];
@@ -106,15 +112,21 @@ class _ManualModePageState extends State<ManualModePage>
           _isBlinking = !_isBlinking;
         });
       });
+
+      Timer(const Duration(seconds: 30), () {
+        _blinkTimer?.cancel();
+        setState(() {
+          _isBlinking = false;
+          _bottlesReplaced = true;
+        });
+      });
     }
   }
 
   void _handleStartProcess() {
-    if (_isBlinking) {
-      _blinkTimer?.cancel();
+    if (_bottlesReplaced) {
       setState(() {
-        _isBlinking = false;
-        _bottlesReplaced = true;
+        _bottlesReplaced = false;
       });
 
       _filledTimer = Timer(const Duration(seconds: 25), () {
@@ -125,34 +137,59 @@ class _ManualModePageState extends State<ManualModePage>
     }
   }
 
+  void _handleStop() {
+    _blinkTimer?.cancel();
+    _filledTimer?.cancel();
+    setState(() {
+      _isBlinking = false;
+      _bottlesReplaced = false;
+      _bottlesFilled = false;
+    });
+  }
+
+  void _handleOpenValve() {
+    widget.onStatusChanged('Open Valve');
+  }
+
+  void _handleCloseValve() {
+    widget.onStatusChanged('Close Valve');
+  }
+
+  void _handleStart() {
+    widget.onStatusChanged('Start');
+    _handleStartProcess();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: _modules.length,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF1B4D4C),
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Module ${_modules[_tabController.index]['moduleNumber']}: ${_modules[_tabController.index]['title']}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Module ${_modules[_tabController.index]['moduleNumber']}: ${_modules[_tabController.index]['title']}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
-            ],
-          ),
-          bottom: TabBar(
+            ),
+          ],
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: TabBar(
             controller: _tabController,
             isScrollable: true,
             indicatorColor: Colors.white,
@@ -166,10 +203,16 @@ class _ManualModePageState extends State<ManualModePage>
             }).toList(),
           ),
         ),
-        body: TabBarView(
-          controller: _tabController,
-          children: _modules.map((module) => _buildModulePage(module)).toList(),
-        ),
+      ),
+      body: Stack(
+        children: [
+          const BackgroundWidget(),
+          TabBarView(
+            controller: _tabController,
+            children:
+                _modules.map((module) => _buildModulePage(module)).toList(),
+          ),
+        ],
       ),
     );
   }
@@ -179,15 +222,19 @@ class _ManualModePageState extends State<ManualModePage>
       length: module['subpages'].length,
       child: Column(
         children: [
+          const SizedBox(height: 120),
           Container(
-            color: Colors.white,
+            color: Colors.black,
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: TabBar(
-              labelColor: const Color(0xFF1B4D4C),
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: const Color(0xFF1B4D4C),
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white70,
+              indicatorColor: Colors.white,
+              indicatorWeight: 3,
               tabs: module['subpages']
                   .map<Widget>((subpage) => Tab(
                         text: subpage['title'],
+                        height: 40,
                       ))
                   .toList(),
             ),
@@ -195,8 +242,8 @@ class _ManualModePageState extends State<ManualModePage>
           Expanded(
             child: TabBarView(
               children: module['subpages']
-                  .map<Widget>(
-                      (subpage) => _buildSubPage(subpage, module['title']))
+                  .map<Widget>((subpage) => _buildSubPage(
+                      subpage, module['title'], module['moduleNumber']))
                   .toList(),
             ),
           ),
@@ -205,61 +252,37 @@ class _ManualModePageState extends State<ManualModePage>
     );
   }
 
-  Widget _buildSubPage(Map<String, dynamic> subpage, String moduleTitle) {
-    if (subpage['title'] == 'Water Level') {
-      return _buildWaterLevelPage();
-    } else {
-      return _buildOverviewPage(moduleTitle);
+  Widget _buildSubPage(
+      Map<String, dynamic> subpage, String moduleTitle, int moduleNumber) {
+    switch (subpage['title']) {
+      case 'Diluent':
+        return _buildDiluentPage();
+      case 'Stock':
+        return _buildStockPage();
+      case 'Water Level':
+        return _buildWaterLevelPage();
+      default:
+        return _buildOverviewPage(moduleTitle, moduleNumber);
     }
   }
 
-  Widget _buildWaterLevelPage() {
-    return const Center(
-      child: Text(
-        'Water Level Information\n(To be implemented)',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 18,
-          color: Color(0xFF1B4D4C),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOverviewPage(String moduleTitle) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
+  Widget _buildOverviewPage(String moduleTitle, int moduleNumber) {
+    return ModulePage(
+      moduleTitle: moduleTitle,
+      moduleNumber: moduleNumber,
+      moduleContent: Column(
         children: [
-          _buildModuleDiagram(moduleTitle),
           if (moduleTitle == 'Filling Process') _buildBottleIndicators(),
           const SizedBox(height: 20),
-          _buildControlButtons(moduleTitle == 'Filling Process'),
+          ControlButtons(
+            onOpenValve: _handleOpenValve,
+            onCloseValve: _handleCloseValve,
+            onStart: _handleStart,
+            onStop: _handleStop,
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildModuleDiagram(String moduleTitle) {
-    return Container(
-      width: double.infinity,
-      height: 200,
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFF1B4D4C).withOpacity(0.2)),
-      ),
-      child: Center(
-        child: Text(
-          moduleTitle,
-          style: const TextStyle(
-            fontSize: 20,
-            color: Color(0xFF1B4D4C),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+      bottomButton: moduleNumber == 4 ? _buildBottlesReplacedButton() : null,
     );
   }
 
@@ -269,14 +292,14 @@ class _ManualModePageState extends State<ManualModePage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildLEDWithLabel(
-            'Bottles Filled',
-            _bottlesFilled ? Colors.green : Colors.grey,
+          LEDWithLabel(
+            label: 'Bottles Filled',
+            color: _bottlesFilled ? Colors.green : Colors.grey,
           ),
-          _buildLEDWithLabel(
-            'Bottles Replaced',
-            _isBlinking
-                ? Colors.orange
+          LEDWithLabel(
+            label: 'Bottles Replaced',
+            color: _isBlinking
+                ? (_isBlinking ? Colors.orange : Colors.grey)
                 : (_bottlesReplaced ? Colors.orange : Colors.grey),
           ),
         ],
@@ -284,80 +307,102 @@ class _ManualModePageState extends State<ManualModePage>
     );
   }
 
-  Widget _buildControlButtons(bool showBottleIndicators) {
-    return Wrap(
-      spacing: 16,
-      runSpacing: 16,
-      alignment: WrapAlignment.center,
-      children: [
-        _buildControlButton('Start Process', _handleStartProcess),
-        _buildControlButton('Stop Process'),
-        _buildControlButton('Open Valve'),
-        _buildControlButton('Close Valve'),
-        if (showBottleIndicators)
-          _buildControlButton('Replace Bottles', _handleBottlesReplaced),
-      ],
-    );
-  }
-
-  Widget _buildControlButton(String label, [VoidCallback? onPressed]) {
-    return SizedBox(
-      width: (MediaQuery.of(context).size.width - 48) / 2,
+  Widget _buildBottlesReplacedButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: ElevatedButton(
-        onPressed: onPressed ??
-            () {
-              widget.onStatusChanged("$label initiated");
-            },
+        onPressed: _handleBottlesReplaced,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF1B4D4C),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          elevation: 2,
+          backgroundColor: Colors.orange,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          minimumSize: const Size(200, 48),
         ),
-        child: Text(
-          label,
-          style: const TextStyle(
+        child: const Text(
+          'Bottles Replaced',
+          style: TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLEDWithLabel(String label, Color color) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 20,
-          height: 20,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            boxShadow: [
-              if (color != Colors.grey)
-                BoxShadow(
-                  color: color.withOpacity(0.4),
-                  blurRadius: 8,
-                  spreadRadius: 2,
-                ),
-            ],
+  Widget _buildDiluentPage() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ModuleCard(
+            title: 'Diluent Control',
+            child: Column(
+              
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF1B4D4C),
+          const SizedBox(height: 20),
+          ControlButtons(
+            onOpenValve: _handleOpenValve,
+            onCloseValve: _handleCloseValve,
+            onStart: _handleStart,
+            onStop: _handleStop,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
+
+  Widget _buildStockPage() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ModuleCard(
+            title: 'Stock Solution Control',
+            child: Column(
+              
+            ),
+          ),
+          const SizedBox(height: 20),
+          ControlButtons(
+            onOpenValve: _handleOpenValve,
+            onCloseValve: _handleCloseValve,
+            onStart: _handleStart,
+            onStop: _handleStop,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWaterLevelPage() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ModuleCard(
+            title: 'Water Level Control',
+            child: Column(
+              
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+}
+
+void main() {
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: ManualModePage(
+      selectedModule: 0,
+      onModuleChanged: (index) {},
+      onStatusChanged: (status) {},
+    ),
+  ));
 }
