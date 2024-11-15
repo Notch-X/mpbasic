@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1032252473086",
+    "firebase_url": "https://mp-amc-default-rtdb.firebaseio.com",
+    "project_id": "mp-amc",
+    "storage_bucket": "mp-amc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1032252473086:android:55eccc81322b432da52faf",
+        "android_client_info": {
+          "package_name": "com.example.mpbasic"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmeinH_x3ka209an6TkOGx8A-L9yf7qiE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
