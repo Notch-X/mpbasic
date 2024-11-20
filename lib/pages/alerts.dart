@@ -109,7 +109,7 @@ class _AlertPageState extends State<AlertPage> {
   AppBar appBar() {
     return AppBar(
       title: const Text(
-        'Alerts Page',
+        'Alerts',
         style: TextStyle(
           color: Colors.white,
           fontSize: 22,
