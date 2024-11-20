@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:mpbasic/models/category_model.dart';
-import 'package:mpbasic/pages/UI/UX/background_widget.dart';
-import 'package:mpbasic/pages/UI/UX/bottom_app_bar_widget.dart';
-import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
+// import 'package:mpbasic/pages/UI/UX/background_widget.dart';
+// import 'package:mpbasic/pages/UI/UX/bottom_app_bar_widget.dart';
+// import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
 import 'package:mpbasic/pages/analytics.dart';
 import 'package:mpbasic/pages/process.dart';
 import 'package:mpbasic/pages/home.dart';
 import 'package:mpbasic/pages/ai.dart';
-
-
+import 'package:firebase_database/firebase_database.dart';
 
 class AlertPage extends StatefulWidget {
   const AlertPage({super.key});
@@ -18,8 +17,8 @@ class AlertPage extends StatefulWidget {
 }
 
 class _AlertPageState extends State<AlertPage> {
+  final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref();
   List<CategoryModel> categories = [];
- 
 
   @override
   void initState() {
@@ -31,7 +30,6 @@ class _AlertPageState extends State<AlertPage> {
     categories = CategoryModel.getCategories();
   }
 
-  
   void _navigateToPage(String route, BuildContext context) {
     Navigator.pop(context);
 
@@ -72,36 +70,41 @@ class _AlertPageState extends State<AlertPage> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      
-      home: Scaffold(
-        appBar: appBar(),
-        extendBodyBehindAppBar: true,
-        backgroundColor: Colors.black,
-        drawer: DrawerWidget(navigateToPage: _navigateToPage),
-        body: Stack(
-          children: [
-            const BackgroundWidget(),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 100),
-                // Add your alerts content here
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Container(
-                        // Add your alerts interface here
-                        ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        bottomNavigationBar:
-            BottomAppBarWidget(navigateToPage: _navigateToPage),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('AI Chatbot Page'),
+      ),
+      body: StreamBuilder(
+        stream: _databaseReference
+            .child('set')
+            .onValue, // Replace 'your-node-name' with your actual node
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (snapshot.hasData && snapshot.data != null) {
+            final data = snapshot.data!.snapshot.value;
+            // Assuming your data is a Map, or adjust this according to your data structure.
+            return ListView.builder(
+              itemCount: (data as Map).length,
+              itemBuilder: (context, index) {
+                String key = (data as Map).keys.elementAt(index);
+                var value = (data as Map)[key];
+                return ListTile(
+                  title: Text(key), // Use data as per your need
+                  subtitle: Text(value.toString()),
+                );
+              },
+            );
+          }
+
+          return Center(child: Text('No data available'));
+        },
       ),
     );
   }
