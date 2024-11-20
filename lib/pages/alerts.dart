@@ -1,13 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:mpbasic/models/category_model.dart';
-// import 'package:mpbasic/pages/UI/UX/background_widget.dart';
-// import 'package:mpbasic/pages/UI/UX/bottom_app_bar_widget.dart';
-// import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
+import 'package:mpbasic/pages/UI/UX/bottom_app_bar_widget.dart';
+import 'package:mpbasic/pages/ai.dart';
 import 'package:mpbasic/pages/analytics.dart';
 import 'package:mpbasic/pages/process.dart';
-import 'package:mpbasic/pages/home.dart';
-import 'package:mpbasic/pages/ai.dart';
-import 'package:firebase_database/firebase_database.dart';
+
+
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Initialize Firebase
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'OEE Viewer',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const AlertPage(),
+    );
+  }
+}
 
 class AlertPage extends StatefulWidget {
   const AlertPage({super.key});
@@ -18,17 +40,6 @@ class AlertPage extends StatefulWidget {
 
 class _AlertPageState extends State<AlertPage> {
   final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref();
-  List<CategoryModel> categories = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _getCategories();
-  }
-
-  void _getCategories() {
-    categories = CategoryModel.getCategories();
-  }
 
   void _navigateToPage(String route, BuildContext context) {
     Navigator.pop(context);
@@ -37,7 +48,7 @@ class _AlertPageState extends State<AlertPage> {
       case 'Home':
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => const MyApp()),
           (route) => false,
         );
         break;
@@ -72,68 +83,62 @@ class _AlertPageState extends State<AlertPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('AI Chatbot Page'),
+        title: const Text(
+          'OEE Viewer',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.blue,
+        elevation: 0.0,
+        centerTitle: true,
       ),
+      drawer: DrawerWidget(navigateToPage: _navigateToPage),
       body: StreamBuilder(
-        stream: _databaseReference
-            .child('set')
-            .onValue, // Replace 'your-node-name' with your actual node
+        stream: _databaseReference.child('set').child('OEE').onValue,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          if (snapshot.hasData && snapshot.data != null) {
-            final data = snapshot.data!.snapshot.value;
-            // Assuming your data is a Map, or adjust this according to your data structure.
-            return ListView.builder(
-              itemCount: (data as Map).length,
-              itemBuilder: (context, index) {
-                String key = (data as Map).keys.elementAt(index);
-                var value = (data as Map)[key];
-                return ListTile(
-                  title: Text(key), // Use data as per your need
-                  subtitle: Text(value.toString()),
-                );
-              },
+            return const Center(
+              child: CircularProgressIndicator(),
             );
           }
 
-          return Center(child: Text('No data available'));
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: const TextStyle(fontSize: 18, color: Colors.red),
+              ),
+            );
+          }
+
+          if (snapshot.hasData && snapshot.data != null) {
+            // Extract the OEE value
+            final oeeValue = snapshot.data!.snapshot.value;
+
+            return Center(
+              child: Text(
+                'OEE Value: $oeeValue',
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+            );
+          }
+
+          return const Center(
+            child: Text(
+              'No OEE data available',
+              style: TextStyle(fontSize: 18, color: Colors.black54),
+            ),
+          );
         },
       ),
-    );
-  }
-
-  AppBar appBar() {
-    return AppBar(
-      title: const Text(
-        'Alerts',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      backgroundColor: Colors.transparent,
-      elevation: 0.0,
-      centerTitle: true,
-      leading: Builder(
-        builder: (context) => IconButton(
-          icon: const Icon(
-            Icons.menu,
-            color: Colors.white,
-            size: 28,
-          ),
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
-        ),
-      ),
+      bottomNavigationBar: BottomAppBarWidget(navigateToPage: _navigateToPage),
     );
   }
 }
