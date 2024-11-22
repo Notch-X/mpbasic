@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:mpbasic/pages/Data/availability_widget.dart';
+import 'package:mpbasic/pages/Data/oee_widget.dart';
+import 'package:mpbasic/pages/Data/performance_widget.dart';
+import 'package:mpbasic/pages/Data/quality_widget.dart';
 import 'package:mpbasic/pages/home.dart';
 import 'package:mpbasic/pages/process.dart';
 import 'package:mpbasic/pages/ai.dart';
@@ -17,10 +22,10 @@ class AnalyticsPage extends StatefulWidget {
 class _AnalyticsPageState extends State<AnalyticsPage>
     with TickerProviderStateMixin {
   int _selectedSection = 0;
-  // ignore: unused_field
   int _selectedSubPage = 0;
   TabController? _tabController;
   TabController? _subTabController;
+  final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref();
 
   final List<Map<String, dynamic>> _sections = [
     {
@@ -146,7 +151,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
             width: MediaQuery.of(context).size.width * 0.9,
             height: MediaQuery.of(context).size.height * 0.8,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.transparent,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -162,11 +167,11 @@ class _AnalyticsPageState extends State<AnalyticsPage>
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1B4D4C),
+                          color: Colors.white,
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(Icons.close, color: Colors.white),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
@@ -220,7 +225,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
           fontWeight: FontWeight.bold,
         ),
       ),
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       elevation: 0.0,
       centerTitle: true,
       leading: Builder(
@@ -246,18 +251,16 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         _sections[_selectedSection]['subpages'];
     return Container(
       height: 50,
-      // Remove the background color to make it transparent
+      color: Colors.transparent,
       child: TabBar(
         controller: _subTabController,
         isScrollable: true,
         labelColor: Colors.white,
         unselectedLabelColor: Colors.white.withOpacity(0.6),
         indicatorColor: Colors.white,
-        // Add these properties to remove the default tab background
         indicator: const UnderlineTabIndicator(
           borderSide: BorderSide(width: 2, color: Colors.white),
         ),
-        // Remove any padding or margins that might show the background
         labelPadding: const EdgeInsets.symmetric(horizontal: 16),
         tabs: currentSubpages.map((subpage) {
           return Tab(text: subpage['title']);
@@ -291,7 +294,8 @@ class _AnalyticsPageState extends State<AnalyticsPage>
 
   Widget _buildAnalyticsCard(Map<String, dynamic> subpage) {
     return Card(
-      elevation: 4,
+      elevation: 0,
+      color: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () => _showFullScreenDiagram(context, subpage),
@@ -306,6 +310,23 @@ class _AnalyticsPageState extends State<AnalyticsPage>
   }
 
   Widget _buildAnalyticsDiagram(Map<String, dynamic> subpage) {
+    if (_selectedSection == 0 && subpage['title'] == 'Availability') {
+      return AvailabilityWidget(databaseReference: _databaseReference);
+    }
+
+    if (_selectedSection == 0 && subpage['title'] == 'Performance') {
+      return PerformanceWidget(databaseReference: _databaseReference);
+    }
+
+    if (_selectedSection == 0 && subpage['title'] == 'Quality') {
+      return QualityWidget(databaseReference: _databaseReference);
+    }
+
+    if (_selectedSection == 2 &&
+        subpage['title'] == 'Overall Equipment Effectiveness') {
+      return OEEWidget(databaseReference: _databaseReference);
+    }
+
     return Center(
       child: Text(
         'Analytics Data for ${subpage['title']}',
@@ -313,32 +334,42 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         style: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: Color(0xFF1B4D4C),
+          color: Colors.white,
         ),
       ),
     );
   }
 
   Widget _buildDetailsCard(Map<String, dynamic> subpage) {
+    if (_selectedSection == 0 && subpage['title'] == 'Availability') {
+      return AvailabilityDetailsWidget(databaseReference: _databaseReference);
+    }
+
+    if (_selectedSection == 0 && subpage['title'] == 'Performance') {
+      return PerformanceWidget(databaseReference: _databaseReference);
+    }
+
+    if (_selectedSection == 0 && subpage['title'] == 'Quality') {
+      return QualityWidget(databaseReference: _databaseReference);
+    }
+
+    if (_selectedSection == 2 &&
+        subpage['title'] == 'Overall Equipment Effectiveness') {
+      return OEEDetailsWidget(databaseReference: _databaseReference);
+    }
+
     return Card(
-      elevation: 4,
+      elevation: 0,
+      color: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${subpage['title']} Details',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1B4D4C),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Add your details widgets here
-          ],
+        child: Text(
+          'Details for ${subpage['title']}',
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+          ),
         ),
       ),
     );
