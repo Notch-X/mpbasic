@@ -36,6 +36,10 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.10+1
   firebase_core: ^3.8.0
+  flutter_native_splash: ^2.3.7
+  flutter_riverpod: ^2.4.10
+  flutter_dotenv: ^5.1.0
+  google_generative_ai: ^0.4.0
 
 dev_dependencies:
   flutter_test:
@@ -61,6 +65,9 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/onboarding.png
+    - assets/send.png
+    - .env
     - assets/icons/
     - assets/images/sg-green-plan.jpg
     - assets/images/Green_Plan.jpg
