@@ -341,37 +341,37 @@ class _AnalyticsPageState extends State<AnalyticsPage>
   }
 
   Widget _buildDetailsCard(Map<String, dynamic> subpage) {
-    if (_selectedSection == 0 && subpage['title'] == 'Availability') {
-      return AvailabilityDetailsWidget(databaseReference: _databaseReference);
-    }
+  if (_selectedSection == 0 && subpage['title'] == 'Availability') {
+    return AvailabilityDetailsWidget(databaseReference: _databaseReference);
+  }
 
-    if (_selectedSection == 0 && subpage['title'] == 'Performance') {
-      return PerformanceWidget(databaseReference: _databaseReference);
-    }
+  if (_selectedSection == 0 && subpage['title'] == 'Performance') {
+    return PerformanceDetailsWidget(databaseReference: _databaseReference);
+  }
 
-    if (_selectedSection == 0 && subpage['title'] == 'Quality') {
-      return QualityWidget(databaseReference: _databaseReference);
-    }
+  if (_selectedSection == 0 && subpage['title'] == 'Quality') {
+    return QualityDetailsWidget(databaseReference: _databaseReference);
+  }
 
-    if (_selectedSection == 2 &&
-        subpage['title'] == 'Overall Equipment Effectiveness') {
-      return OEEDetailsWidget(databaseReference: _databaseReference);
-    }
+  if (_selectedSection == 2 &&
+      subpage['title'] == 'Overall Equipment Effectiveness') {
+    return OEEDetailsWidget(databaseReference: _databaseReference);
+  }
 
-    return Card(
-      elevation: 0,
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(
-          'Details for ${subpage['title']}',
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.white,
-          ),
+  return Card(
+    elevation: 0,
+    color: Colors.transparent,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Text(
+        'Details for ${subpage['title']}',
+        style: const TextStyle(
+          fontSize: 16,
+          color: Colors.white,
         ),
       ),
-    );
-  }
+    ),
+  );
 }
+    }

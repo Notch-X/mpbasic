@@ -6,7 +6,6 @@ import 'package:mpbasic/pages/controls/led_with_label.dart';
 import 'package:mpbasic/pages/controls/module_page.dart';
 import 'package:mpbasic/pages/controls/module_card.dart';
 
-
 class ManualModePage extends StatefulWidget {
   final int selectedModule;
   final Function(int) onModuleChanged;
@@ -55,7 +54,6 @@ class _ManualModePageState extends State<ManualModePage>
       'moduleNumber': 3,
       'subpages': [
         {'title': 'Overview'},
-        {'title': 'Water Level'},
       ]
     },
     {
@@ -63,7 +61,6 @@ class _ManualModePageState extends State<ManualModePage>
       'moduleNumber': 4,
       'subpages': [
         {'title': 'Overview'},
-        {'title': 'Water Level'},
       ]
     },
     {
@@ -71,7 +68,6 @@ class _ManualModePageState extends State<ManualModePage>
       'moduleNumber': 5,
       'subpages': [
         {'title': 'Overview'},
-        {'title': 'Water Level'},
       ]
     },
   ];
@@ -338,7 +334,7 @@ class _ManualModePageState extends State<ManualModePage>
           ModuleCard(
             title: 'Diluent Control',
             child: Column(
-              
+              // Add your Diluent Control content here
             ),
           ),
           const SizedBox(height: 20),
@@ -362,7 +358,7 @@ class _ManualModePageState extends State<ManualModePage>
           ModuleCard(
             title: 'Stock Solution Control',
             child: Column(
-              
+              // Add your Stock Solution Control content here
             ),
           ),
           const SizedBox(height: 20),
@@ -386,7 +382,7 @@ class _ManualModePageState extends State<ManualModePage>
           ModuleCard(
             title: 'Water Level Control',
             child: Column(
-              
+              // Add your Water Level Control content here
             ),
           ),
           const SizedBox(height: 20),
