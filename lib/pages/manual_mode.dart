@@ -61,11 +61,19 @@ class _ManualModePageState extends State<ManualModePage>
       'moduleNumber': 4,
       'subpages': [
         {'title': 'Overview'},
+        {'title': 'Bottles'},
+      ]
+    },
+    {
+      'title': 'Testing Process',
+      'moduleNumber': 5,
+      'subpages': [
+        {'title': 'Overview'},
       ]
     },
     {
       'title': 'Waste Tank',
-      'moduleNumber': 5,
+      'moduleNumber': 6,
       'subpages': [
         {'title': 'Overview'},
       ]
@@ -149,6 +157,22 @@ class _ManualModePageState extends State<ManualModePage>
 
   void _handleCloseValve() {
     widget.onStatusChanged('Close Valve');
+  }
+
+  void _handleOpenV18Valve() {
+    widget.onStatusChanged('Open V18 Valve');
+  }
+
+  void _handleCloseV18Valve() {
+    widget.onStatusChanged('Close V18 Valve');
+  }
+
+  void _handleOpenV19Valve() {
+    widget.onStatusChanged('Open V19 Valve');
+  }
+
+  void _handleCloseV19Valve() {
+    widget.onStatusChanged('Close V19 Valve');
   }
 
   void _handleStart() {
@@ -257,6 +281,10 @@ class _ManualModePageState extends State<ManualModePage>
         return _buildStockPage();
       case 'Water Level':
         return _buildWaterLevelPage();
+      case 'Mixer':
+        return _buildMixerPage();
+      case 'Bottles':
+        return _buildBottlesPage();
       default:
         return _buildOverviewPage(moduleTitle, moduleNumber);
     }
@@ -267,61 +295,98 @@ class _ManualModePageState extends State<ManualModePage>
       moduleTitle: moduleTitle,
       moduleNumber: moduleNumber,
       moduleContent: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (moduleTitle == 'Filling Process') _buildBottleIndicators(),
           const SizedBox(height: 20),
-          ControlButtons(
-            onOpenValve: _handleOpenValve,
-            onCloseValve: _handleCloseValve,
-            onStart: _handleStart,
-            onStop: _handleStop,
-          ),
+          if (moduleNumber == 3) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // Implement Mixer functionality
+                  },
+                  child: const Text('Mixer'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Implement Pump functionality
+                  },
+                  child: const Text('Pump'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: _handleOpenValve,
+                      child: const Text('Open Valve'),
+                    ),
+                    ElevatedButton(
+                      onPressed: _handleCloseValve,
+                      child: const Text('Close Valve'),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: _handleOpenValve,
+                      child: const Text('Open Valve'),
+                    ),
+                    ElevatedButton(
+                      onPressed: _handleCloseValve,
+                      child: const Text('Close Valve'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+          if (moduleNumber == 5) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _handleOpenV18Valve,
+                  child: const Text('Open V18 Valve'),
+                ),
+                const SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: _handleCloseV18Valve,
+                  child: const Text('Close V18 Valve'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _handleOpenV19Valve,
+                  child: const Text('Open V19 Valve'),
+                ),
+                const SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: _handleCloseV19Valve,
+                  child: const Text('Close V19 Valve'),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 20),
+          if (moduleNumber != 5)
+            ControlButtons(
+              onOpenValve: _handleOpenValve,
+              onCloseValve: _handleCloseValve,
+            ),
         ],
       ),
-      bottomButton: moduleNumber == 4 ? _buildBottlesReplacedButton() : null,
-    );
-  }
-
-  Widget _buildBottleIndicators() {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          LEDWithLabel(
-            label: 'Bottles Filled',
-            color: _bottlesFilled ? Colors.green : Colors.grey,
-          ),
-          LEDWithLabel(
-            label: 'Bottles Replaced',
-            color: _isBlinking
-                ? (_isBlinking ? Colors.orange : Colors.grey)
-                : (_bottlesReplaced ? Colors.orange : Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottlesReplacedButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: ElevatedButton(
-        onPressed: _handleBottlesReplaced,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          minimumSize: const Size(200, 48),
-        ),
-        child: const Text(
-          'Bottles Replaced',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
+      bottomButton: moduleNumber == 4 ? null : null,
     );
   }
 
@@ -341,8 +406,6 @@ class _ManualModePageState extends State<ManualModePage>
           ControlButtons(
             onOpenValve: _handleOpenValve,
             onCloseValve: _handleCloseValve,
-            onStart: _handleStart,
-            onStop: _handleStop,
           ),
         ],
       ),
@@ -362,13 +425,98 @@ class _ManualModePageState extends State<ManualModePage>
             ),
           ),
           const SizedBox(height: 20),
-          ControlButtons(
-            onOpenValve: _handleOpenValve,
-            onCloseValve: _handleCloseValve,
-            onStart: _handleStart,
-            onStop: _handleStop,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  // Implement Mixer functionality
+                },
+                child: const Text('Mixer'),
+              ),
+              ControlButtons(
+                onOpenValve: _handleOpenValve,
+                onCloseValve: _handleCloseValve,
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMixerPage() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  // Implement Mixer functionality
+                },
+                child: const Text('Mixer'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  // Implement Pump functionality
+                },
+                child: const Text('Pump'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: _handleOpenValve,
+                    child: const Text('Open Valve'),
+                  ),
+                  ElevatedButton(
+                    onPressed: _handleCloseValve,
+                    child: const Text('Close Valve'),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: _handleOpenValve,
+                    child: const Text('Open Valve'),
+                  ),
+                  ElevatedButton(
+                    onPressed: _handleCloseValve,
+                    child: const Text('Close Valve'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottlesPage() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: List.generate(10, (index) {
+          return ModuleCard(
+            title: 'Bottle ${index + 1}',
+            child: BottleButton(
+              index: index,
+              onStatusChanged: widget.onStatusChanged,
+            ),
+          );
+        }),
       ),
     );
   }
@@ -388,6 +536,41 @@ class _ManualModePageState extends State<ManualModePage>
           const SizedBox(height: 20),
         ],
       ),
+    );
+  }
+}
+
+class BottleButton extends StatefulWidget {
+  final int index;
+  final Function(String) onStatusChanged;
+
+  const BottleButton({
+    Key? key,
+    required this.index,
+    required this.onStatusChanged,
+  }) : super(key: key);
+
+  @override
+  _BottleButtonState createState() => _BottleButtonState();
+}
+
+class _BottleButtonState extends State<BottleButton> {
+  bool _isOpen = false;
+
+  void _toggleValve() {
+    setState(() {
+      _isOpen = !_isOpen;
+      widget.onStatusChanged(
+          'Valve for Bottle ${widget.index + 1} ${_isOpen ? 'Open' : 'Close'}');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: _toggleValve,
+      child: Text(
+          '${_isOpen ? 'Close' : 'Open'} Valve for Bottle ${widget.index + 1}'),
     );
   }
 }
