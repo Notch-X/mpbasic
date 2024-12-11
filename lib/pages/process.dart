@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:mpbasic/pages/UI/UX/background_widget.dart';
 import 'package:mpbasic/pages/UI/UX/bottom_app_bar_widget.dart';
 import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
@@ -8,6 +11,26 @@ import 'package:mpbasic/pages/alerts.dart';
 import 'package:mpbasic/pages/analytics.dart';
 import 'package:mpbasic/pages/manual_mode.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Process Control',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.black,
+      ),
+      home: const ProcessPage(),
+    );
+  }
+}
+
 class ProcessPage extends StatefulWidget {
   const ProcessPage({super.key});
 
@@ -16,24 +39,73 @@ class ProcessPage extends StatefulWidget {
 }
 
 class _ProcessPageState extends State<ProcessPage> {
-  String _status = "";
-  bool _isAutoMode = false;
-  bool _isStopped = true;
-  double _oeeValue = 100.0;
-  bool _bottlesReplaced = false;
+  bool isButton1Toggled = false;
+  bool isButton2Toggled = false;
+  bool isButton3Toggled = false;
 
-  void _resetOEE() {
-    setState(() {
-      _oeeValue = 100.0;
-      _status = "OEE Reset to 100%";
-    });
+  Future<void> sendStateToFlask() async {
+    try {
+      // Use 10.0.2.2 for Android emulator
+      // For physical device, use your computer's IP address
+      final url = Uri.parse('http://10.0.2.2:5000');
+
+      final response = await http
+          .post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'button1': isButton1Toggled,
+          'button2': isButton2Toggled,
+          'button3': isButton3Toggled,
+        }),
+      )
+          .timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          throw TimeoutException('Connection timed out');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Response from Flask: ${response.body}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Mode updated successfully')),
+          );
+        }
+      } else {
+        print('Failed to send data to Flask: ${response.statusCode}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to update mode')),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error sending data to Flask: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Connection error. Please check if the server is running.'),
+          ),
+        );
+      }
+    }
   }
 
-  void _replaceBottles() {
+  void updateButtonStates(int buttonNumber) {
     setState(() {
-      _bottlesReplaced = true;
-      _status = "Bottles Replaced Successfully";
+      isButton1Toggled = false;
+      isButton2Toggled = false;
+      isButton3Toggled = false;
+
+      if (buttonNumber == 1) isButton1Toggled = true;
+      if (buttonNumber == 2) isButton2Toggled = true;
+      if (buttonNumber == 3) isButton3Toggled = true;
     });
+
+    sendStateToFlask();
   }
 
   @override
@@ -78,137 +150,154 @@ class _ProcessPageState extends State<ProcessPage> {
   }
 
   Widget _buildOverallSystemPage() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          const SizedBox(height: 100), // Add padding for AppBar
-          Center(
+    return SafeArea(
+      child: Center(
+        child: SingleChildScrollView(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildControlCard(
+                const SizedBox(height: 40),
+                _buildSystemStatus(),
+                const SizedBox(height: 40),
+                buildToggleButton(
                   label: 'Auto',
-                  color: Colors.green,
-                  isActive: _isAutoMode,
-                  onPressed: () {
-                    setState(() {
-                      _isAutoMode = true;
-                      _isStopped = false;
-                      _status = "System is running in Auto mode";
-                    });
-                  },
+                  isToggled: isButton1Toggled,
+                  onPressed: () => updateButtonStates(1),
+                  icon: Icons.auto_mode,
                 ),
-                _buildControlCard(
+                const SizedBox(height: 24),
+                buildToggleButton(
                   label: 'Stop',
-                  color: Colors.red,
-                  isActive: _isStopped,
-                  onPressed: () {
-                    setState(() {
-                      _isAutoMode = false;
-                      _isStopped = true;
-                      _status = "System stopped running";
-                    });
-                  },
+                  isToggled: isButton2Toggled,
+                  onPressed: () => updateButtonStates(2),
+                  icon: Icons.stop_circle,
                 ),
-                _buildControlCard(
+                const SizedBox(height: 24),
+                buildToggleButton(
                   label: 'Manual',
-                  color: Colors.orange,
-                  isActive: false,
+                  isToggled: isButton3Toggled,
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ManualModePage(
-                          selectedModule: 0,
-                          onModuleChanged: (int moduleIndex) {},
-                          onStatusChanged: (String newStatus) {
-                            setState(() {
-                              _status = newStatus;
-                            });
-                          },
-                        ),
-                      ),
-                    );
+                    updateButtonStates(3);
+                    _navigateToPage('Manual', context);
                   },
+                  icon: Icons.handyman,
                 ),
-                _buildControlCard(
-                  label: 'OEE Reset',
-                  color: Colors.blue,
-                  isActive: false,
-                  onPressed: _resetOEE,
-                ),
-                _buildControlCard(
-                  label: 'Replace Bottles',
-                  color: Colors.purple,
-                  isActive: _bottlesReplaced,
-                  onPressed: _replaceBottles,
-                ),
+                const SizedBox(height: 40),
               ],
             ),
-          ),
-          if (_status.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                _status,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildControlCard({
-    required String label,
-    required Color color,
-    required bool isActive,
-    required VoidCallback onPressed,
-  }) {
-    return Card(
-      color: Colors.white.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      elevation: 5,
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      child: InkWell(
-        onTap: onPressed,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: isActive ? color : Colors.grey,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ],
           ),
         ),
       ),
     );
   }
 
+  Widget _buildSystemStatus() {
+    String status = 'System Status: ';
+    Color statusColor;
+
+    if (isButton1Toggled) {
+      status += 'Automatic Mode';
+      statusColor = Colors.green;
+    } else if (isButton2Toggled) {
+      status += 'Stopped';
+      statusColor = Colors.red;
+    } else if (isButton3Toggled) {
+      status += 'Manual Mode';
+      statusColor = Colors.orange;
+    } else {
+      status += 'Idle';
+      statusColor = Colors.grey;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.circle,
+            size: 12,
+            color: statusColor,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            status,
+            style: TextStyle(
+              color: statusColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildToggleButton({
+    required String label,
+    required bool isToggled,
+    required VoidCallback onPressed,
+    required IconData icon,
+  }) {
+    return Container(
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: isToggled
+                ? const Color(0xFF66C7C7).withOpacity(0.3)
+                : Colors.transparent,
+            blurRadius: 8,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isToggled
+              ? const Color(0xFF66C7C7)
+              : const Color(0xFF66C7C7).withOpacity(0.7),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: isToggled ? 0 : 2,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+        ),
+        onPressed: onPressed,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '$label: ${isToggled ? "ON" : "OFF"}',
+              style: const TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 18.0,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _navigateToPage(String route, BuildContext context) {
-    Navigator.pop(context);
     switch (route) {
       case 'Home':
         Navigator.pushAndRemoveUntil(
@@ -241,6 +330,25 @@ class _ProcessPageState extends State<ProcessPage> {
           context,
           MaterialPageRoute(builder: (context) => const AlertPage()),
         );
+        break;
+      case 'Manual':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ManualModePage(
+              selectedModule: 0,
+              onModuleChanged: (module) {
+                // handle module change
+              },
+              onStatusChanged: (status) {
+                // handle status change
+              },
+            ),
+          ),
+        );
+        break;
+      default:
+        print('Unknown route: $route');
         break;
     }
   }

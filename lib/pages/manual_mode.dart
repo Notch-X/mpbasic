@@ -155,24 +155,12 @@ class _ManualModePageState extends State<ManualModePage>
     widget.onStatusChanged('Open Valve');
   }
 
-  void _handleCloseValve() {
-    widget.onStatusChanged('Close Valve');
-  }
-
   void _handleOpenV18Valve() {
     widget.onStatusChanged('Open V18 Valve');
   }
 
-  void _handleCloseV18Valve() {
-    widget.onStatusChanged('Close V18 Valve');
-  }
-
   void _handleOpenV19Valve() {
     widget.onStatusChanged('Open V19 Valve');
-  }
-
-  void _handleCloseV19Valve() {
-    widget.onStatusChanged('Close V19 Valve');
   }
 
   void _handleStart() {
@@ -302,17 +290,17 @@ class _ManualModePageState extends State<ManualModePage>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(
-                  onPressed: () {
+                ToggleValveButton(
+                  title: 'Mixer',
+                  onStatusChanged: () {
                     // Implement Mixer functionality
                   },
-                  child: const Text('Mixer'),
                 ),
-                ElevatedButton(
-                  onPressed: () {
+                ToggleValveButton(
+                  title: 'Pump',
+                  onStatusChanged: () {
                     // Implement Pump functionality
                   },
-                  child: const Text('Pump'),
                 ),
               ],
             ),
@@ -320,29 +308,13 @@ class _ManualModePageState extends State<ManualModePage>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: _handleOpenValve,
-                      child: const Text('Open Valve'),
-                    ),
-                    ElevatedButton(
-                      onPressed: _handleCloseValve,
-                      child: const Text('Close Valve'),
-                    ),
-                  ],
+                ToggleValveButton(
+                  title: 'Valve 1',
+                  onStatusChanged: _handleOpenValve,
                 ),
-                Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: _handleOpenValve,
-                      child: const Text('Open Valve'),
-                    ),
-                    ElevatedButton(
-                      onPressed: _handleCloseValve,
-                      child: const Text('Close Valve'),
-                    ),
-                  ],
+                ToggleValveButton(
+                  title: 'Valve 2',
+                  onStatusChanged: _handleOpenValve,
                 ),
               ],
             ),
@@ -351,38 +323,26 @@ class _ManualModePageState extends State<ManualModePage>
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
-                  onPressed: _handleOpenV18Valve,
-                  child: const Text('Open V18 Valve'),
+                ToggleValveButton(
+                  title: 'V18 Valve',
+                  onStatusChanged: _handleOpenV18Valve,
+                  isSmall: true,
                 ),
                 const SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: _handleCloseV18Valve,
-                  child: const Text('Close V18 Valve'),
+                ToggleValveButton(
+                  title: 'V19 Valve',
+                  onStatusChanged: _handleOpenV19Valve,
+                  isSmall: true,
                 ),
               ],
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _handleOpenV19Valve,
-                  child: const Text('Open V19 Valve'),
-                ),
-                const SizedBox(width: 20),
-                ElevatedButton(
-                  onPressed: _handleCloseV19Valve,
-                  child: const Text('Close V19 Valve'),
-                ),
-              ],
-            ),
           ],
           const SizedBox(height: 20),
           if (moduleNumber != 5)
             ControlButtons(
               onOpenValve: _handleOpenValve,
-              onCloseValve: _handleCloseValve,
+              onCloseValve: () {},
             ),
         ],
       ),
@@ -399,13 +359,13 @@ class _ManualModePageState extends State<ManualModePage>
           ModuleCard(
             title: 'Diluent Control',
             child: Column(
-              // Add your Diluent Control content here
-            ),
+                // Add your Diluent Control content here
+                ),
           ),
           const SizedBox(height: 20),
           ControlButtons(
             onOpenValve: _handleOpenValve,
-            onCloseValve: _handleCloseValve,
+            onCloseValve: () {},
           ),
         ],
       ),
@@ -421,22 +381,22 @@ class _ManualModePageState extends State<ManualModePage>
           ModuleCard(
             title: 'Stock Solution Control',
             child: Column(
-              // Add your Stock Solution Control content here
-            ),
+                // Add your Stock Solution Control content here
+                ),
           ),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
-                onPressed: () {
+              ToggleValveButton(
+                title: 'Mixer',
+                onStatusChanged: () {
                   // Implement Mixer functionality
                 },
-                child: const Text('Mixer'),
               ),
               ControlButtons(
                 onOpenValve: _handleOpenValve,
-                onCloseValve: _handleCloseValve,
+                onCloseValve: () {},
               ),
             ],
           ),
@@ -454,17 +414,17 @@ class _ManualModePageState extends State<ManualModePage>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
-                onPressed: () {
+              ToggleValveButton(
+                title: 'Mixer',
+                onStatusChanged: () {
                   // Implement Mixer functionality
                 },
-                child: const Text('Mixer'),
               ),
-              ElevatedButton(
-                onPressed: () {
+              ToggleValveButton(
+                title: 'Pump',
+                onStatusChanged: () {
                   // Implement Pump functionality
                 },
-                child: const Text('Pump'),
               ),
             ],
           ),
@@ -472,29 +432,13 @@ class _ManualModePageState extends State<ManualModePage>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: _handleOpenValve,
-                    child: const Text('Open Valve'),
-                  ),
-                  ElevatedButton(
-                    onPressed: _handleCloseValve,
-                    child: const Text('Close Valve'),
-                  ),
-                ],
+              ToggleValveButton(
+                title: 'Valve 1',
+                onStatusChanged: _handleOpenValve,
               ),
-              Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: _handleOpenValve,
-                    child: const Text('Open Valve'),
-                  ),
-                  ElevatedButton(
-                    onPressed: _handleCloseValve,
-                    child: const Text('Close Valve'),
-                  ),
-                ],
+              ToggleValveButton(
+                title: 'Valve 2',
+                onStatusChanged: _handleOpenValve,
               ),
             ],
           ),
@@ -530,8 +474,8 @@ class _ManualModePageState extends State<ManualModePage>
           ModuleCard(
             title: 'Water Level Control',
             child: Column(
-              // Add your Water Level Control content here
-            ),
+                // Add your Water Level Control content here
+                ),
           ),
           const SizedBox(height: 20),
         ],
@@ -567,10 +511,100 @@ class _BottleButtonState extends State<BottleButton> {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: _toggleValve,
-      child: Text(
-          '${_isOpen ? 'Close' : 'Open'} Valve for Bottle ${widget.index + 1}'),
+    return Container(
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF66C7C7).withOpacity(0.3),
+            blurRadius: 8,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF66C7C7),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0),
+          elevation: 6.0,
+        ),
+        onPressed: _toggleValve,
+        child: Text(
+          '${_isOpen ? 'Close' : 'Open'} Valve for Bottle ${widget.index + 1}',
+          style: const TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 18.0,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ToggleValveButton extends StatefulWidget {
+  final String title;
+  final Function() onStatusChanged;
+  final bool isSmall;
+
+  const ToggleValveButton({
+    Key? key,
+    required this.title,
+    required this.onStatusChanged,
+    this.isSmall = false,
+  }) : super(key: key);
+
+  @override
+  _ToggleValveButtonState createState() => _ToggleValveButtonState();
+}
+
+class _ToggleValveButtonState extends State<ToggleValveButton> {
+  bool _isOpen = false;
+
+  void _toggleValve() {
+    setState(() {
+      _isOpen = !_isOpen;
+      widget.onStatusChanged();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: widget.isSmall ? 40 : 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF66C7C7).withOpacity(0.3),
+            blurRadius: 8,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF66C7C7),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: widget.isSmall
+              ? const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0)
+              : const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0),
+          elevation: 6.0,
+        ),
+        onPressed: _toggleValve,
+        child: Text(
+          '${_isOpen ? 'Close' : 'Open'} ${widget.title}',
+          style: const TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 18.0,
+          ),
+        ),
+      ),
     );
   }
 }
