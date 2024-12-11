@@ -45,8 +45,6 @@ class _ProcessPageState extends State<ProcessPage> {
 
   Future<void> sendStateToFlask() async {
     try {
-      // Use 10.0.2.2 for Android emulator
-      // For physical device, use your computer's IP address
       final url = Uri.parse('http://10.0.2.2:5000');
 
       final response = await http
@@ -139,56 +137,41 @@ class _ProcessPageState extends State<ProcessPage> {
         ),
       ),
       drawer: DrawerWidget(navigateToPage: _navigateToPage),
-      body: Stack(
-        children: [
-          const BackgroundWidget(),
-          _buildOverallSystemPage(),
-        ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.black,
+              Colors.blue.shade900.withOpacity(0.3),
+              Colors.black,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: _buildOverallSystemPage(),
+        ),
       ),
       bottomNavigationBar: BottomAppBarWidget(navigateToPage: _navigateToPage),
     );
   }
 
   Widget _buildOverallSystemPage() {
-    return SafeArea(
-      child: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 400),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 40),
-                _buildSystemStatus(),
-                const SizedBox(height: 40),
-                buildToggleButton(
-                  label: 'Auto',
-                  isToggled: isButton1Toggled,
-                  onPressed: () => updateButtonStates(1),
-                  icon: Icons.auto_mode,
-                ),
-                const SizedBox(height: 24),
-                buildToggleButton(
-                  label: 'Stop',
-                  isToggled: isButton2Toggled,
-                  onPressed: () => updateButtonStates(2),
-                  icon: Icons.stop_circle,
-                ),
-                const SizedBox(height: 24),
-                buildToggleButton(
-                  label: 'Manual',
-                  isToggled: isButton3Toggled,
-                  onPressed: () {
-                    updateButtonStates(3);
-                    _navigateToPage('Manual', context);
-                  },
-                  icon: Icons.handyman,
-                ),
-                const SizedBox(height: 40),
-              ],
-            ),
+    return Center(
+      child: SingleChildScrollView(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 400),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 40),
+              _buildSystemStatus(),
+              const SizedBox(height: 40),
+              _buildControlsPanel(),
+            ],
           ),
         ),
       ),
@@ -241,58 +224,108 @@ class _ProcessPageState extends State<ProcessPage> {
     );
   }
 
-  Widget buildToggleButton({
+  Widget _buildControlsPanel() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'System Controls',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 24),
+          _buildControlButton(
+            label: 'Auto',
+            isToggled: isButton1Toggled,
+            onPressed: () => updateButtonStates(1),
+            icon: Icons.auto_mode,
+          ),
+          const SizedBox(height: 16),
+          _buildControlButton(
+            label: 'Stop',
+            isToggled: isButton2Toggled,
+            onPressed: () => updateButtonStates(2),
+            icon: Icons.stop_circle,
+          ),
+          const SizedBox(height: 16),
+          _buildControlButton(
+            label: 'Manual',
+            isToggled: isButton3Toggled,
+            onPressed: () {
+              updateButtonStates(3);
+              _navigateToPage('Manual', context);
+            },
+            icon: Icons.handyman,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildControlButton({
     required String label,
     required bool isToggled,
     required VoidCallback onPressed,
     required IconData icon,
   }) {
     return Container(
-      height: 60,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: isToggled
-                ? const Color(0xFF66C7C7).withOpacity(0.3)
-                : Colors.transparent,
-            blurRadius: 8,
-            spreadRadius: 1,
-          ),
-        ],
+        color: Colors.black.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isToggled
-              ? const Color(0xFF66C7C7)
-              : const Color(0xFF66C7C7).withOpacity(0.7),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: isToggled ? 0 : 2,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-        ),
-        onPressed: onPressed,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              '$label: ${isToggled ? "ON" : "OFF"}',
-              style: const TextStyle(
-                fontFamily: 'Roboto',
-                fontSize: 18.0,
-                fontWeight: FontWeight.w500,
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
                 color: Colors.white,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+          ElevatedButton(
+            onPressed: onPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isToggled
+                  ? const Color(0xFF66C7C7)
+                  : Colors.grey.withOpacity(0.3),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
-          ],
-        ),
+            child: Text(
+              isToggled ? 'ON' : 'OFF',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
