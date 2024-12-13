@@ -1,4 +1,29 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:mpbasic/Manual/diluent_mixer.dart';
+import 'package:mpbasic/Manual/diluent_valve.dart';
+import 'package:mpbasic/Manual/mixer_bottle.dart';
+import 'package:mpbasic/Manual/mixer_pump.dart';
+import 'package:mpbasic/Manual/mixer_tank.dart';
+import 'package:mpbasic/Manual/mixer_output.dart';
+import 'package:mpbasic/Manual/stock_mixer.dart';
+import 'package:mpbasic/Manual/stock_valve.dart';
+import 'package:mpbasic/Manual/supply_valve.dart';
+import 'package:mpbasic/Manual/bottle_valve1.dart';
+import 'package:mpbasic/Manual/bottle_valve2.dart';
+import 'package:mpbasic/Manual/bottle_valve3.dart';
+import 'package:mpbasic/Manual/bottle_valve4.dart';
+import 'package:mpbasic/Manual/bottle_valve5.dart';
+import 'package:mpbasic/Manual/bottle_valve6.dart';
+import 'package:mpbasic/Manual/bottle_valve7.dart';
+import 'package:mpbasic/Manual/bottle_valve8.dart';
+import 'package:mpbasic/Manual/bottle_valve9.dart';
+import 'package:mpbasic/Manual/bottle_valve10.dart';
+import 'package:mpbasic/Manual/v18_valve.dart';
+import 'package:mpbasic/Manual/v19_valve.dart';
+import 'package:mpbasic/Manual/bottle_tray.dart';
 
 class ManualModePage extends StatefulWidget {
   final Function(String)? onStatusChanged;
@@ -32,13 +57,20 @@ class _ManualModePageState extends State<ManualModePage> {
     {
       'id': 3,
       'title': 'Mixer Process',
-      'controls': ['Valve 1', 'Valve 2', 'Valve 3', 'Mixer', 'Pump']
+      'controls': [
+        'Diluent Mixer Valve',
+        'Stock Mixer Valve',
+        'Mixer Tank Valve',
+        'Mixer',
+        'Mixer Output Valve'
+      ]
     },
     {
       'id': 4,
       'title': 'Filling Process',
       'controls': [
-        'Filling Valve',
+        'V16 Valve',
+        'Pump',
         'Bottle 1',
         'Bottle 2',
         'Bottle 3',
@@ -59,7 +91,7 @@ class _ManualModePageState extends State<ManualModePage> {
     {
       'id': 6,
       'title': 'Waste Tank',
-      'controls': ['Waste Valve 1', 'Waste Valve 2']
+      'controls': ['Waste Valve 1']
     }
   ];
 
@@ -76,6 +108,76 @@ class _ManualModePageState extends State<ManualModePage> {
     }
 
     widget.onStatusChanged?.call(status);
+
+    // Send the state to Flask only for specific controls
+   if (moduleId == 1 && control == 'Supply Valve') {
+      sendSupplyValveStateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 2 && control == 'Stock Valve') {
+      sendStockValveStateToFlask(control, controlStates[key] ?? false, context);
+    } else if (moduleId == 2 && control == 'Diluent Valve') {
+      sendDiluentValveStateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 2 && control == 'Stock Mixer Valve') {
+      sendStockMixerValveStateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 3 && control == 'Diluent Mixer Valve') {
+      sendDiluentMixerValveStateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 3 && control == 'Stock Mixer Valve') {
+      sendStockMixerValveStateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 3 && control == 'Mixer Tank Valve') {
+      sendMixerTankValveStateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 3 && control == 'Mixer Output Valve') {
+      sendMixerOutputValveStateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 4 && control == 'Pump') {
+      sendMixerPumpStateToFlask(control, controlStates[key] ?? false, context);
+    } else if (moduleId == 4 && control == 'V16 Valve') {
+      sendMixerBottleValveStateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 4 && control == 'Bottle 1') {
+      sendBottleValve1StateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 4 && control == 'Bottle 2') {
+      sendBottleValve2StateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 4 && control == 'Bottle 3') {
+      sendBottleValve3StateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 4 && control == 'Bottle 4') {
+      sendBottleValve4StateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 4 && control == 'Bottle 5') {
+      sendBottleValve5StateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 4 && control == 'Bottle 6') {
+      sendBottleValve6StateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 4 && control == 'Bottle 7') {
+      sendBottleValve7StateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 4 && control == 'Bottle 8') {
+      sendBottleValve8StateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 4 && control == 'Bottle 9') {
+      sendBottleValve9StateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 4 && control == 'Bottle 10') {
+      sendBottleValve10StateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 5 && control == 'V18 Valve') {
+      sendV18ValveStateToFlask(
+         control, controlStates[key] ?? false, context);
+    } else if (moduleId == 5 && control == 'V19 Valve') {
+      sendV19ValveStateToFlask(
+          control, controlStates[key] ?? false, context);
+    } else if (moduleId == 6 && control == 'Bottle Tray') {
+      sendBottleTrayStateToFlask(
+          control, controlStates[key] ?? false, context);
+    }
   }
 
   @override
@@ -292,7 +394,7 @@ class _ManualModePageState extends State<ManualModePage> {
   Widget _buildBottleGrid(List<String> controls) {
     return Column(
       children: [
-        // Main Valve Control
+        // V16 Valve Control
         Container(
           decoration: BoxDecoration(
             color: Colors.black.withOpacity(0.3),
@@ -304,13 +406,35 @@ class _ManualModePageState extends State<ManualModePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Main Valve',
+                'V16 Valve',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                 ),
               ),
-              _buildValveButton('Main Valve'),
+              _buildValveButton('V16 Valve'),
+            ],
+          ),
+        ),
+        // Pump Control
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.all(12),
+          margin: const EdgeInsets.only(bottom: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Pump',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+              _buildValveButton('Pump'),
             ],
           ),
         ),

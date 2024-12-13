@@ -113,7 +113,7 @@ class _ProcessPageState extends State<ProcessPage> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text(
-          'Overview of System',
+          'PLC Control System',
           style: TextStyle(
             color: Colors.white,
             fontSize: 22,
