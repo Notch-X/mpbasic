@@ -3,10 +3,8 @@ import 'package:firebase_database/firebase_database.dart';
 
 class AvailabilityWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
-
   const AvailabilityWidget({Key? key, required this.databaseReference})
       : super(key: key);
-
   String _formatDuration(int minutes) {
     int hours = minutes ~/ 60;
     int remainingMinutes = minutes % 60;
@@ -30,7 +28,6 @@ class AvailabilityWidget extends StatelessWidget {
             child: CircularProgressIndicator(color: Colors.blue),
           );
         }
-
         if (snapshot.hasError) {
           return Center(
             child: Container(
@@ -47,14 +44,11 @@ class AvailabilityWidget extends StatelessWidget {
             ),
           );
         }
-
         if (snapshot.hasData && snapshot.data?.snapshot.value != null) {
           final data =
               Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
-
-          final availabilityValue = data['Avaliability'] ?? 0;
+          final availabilityValue = data['Availability'] ?? 0;
           final color = _getAvailabilityColor(availabilityValue);
-
           return Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -96,7 +90,6 @@ class AvailabilityWidget extends StatelessWidget {
             ),
           );
         }
-
         return const Center(
           child: Text(
             'No data available',
@@ -110,10 +103,8 @@ class AvailabilityWidget extends StatelessWidget {
 
 class AvailabilityDetailsWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
-
   const AvailabilityDetailsWidget({Key? key, required this.databaseReference})
       : super(key: key);
-
   String _formatDuration(int minutes) {
     int hours = minutes ~/ 60;
     int remainingMinutes = minutes % 60;
@@ -137,12 +128,10 @@ class AvailabilityDetailsWidget extends StatelessWidget {
             ),
           );
         }
-
         final data =
             Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
         final runTime = (data['RunTime'] ?? 0).toInt();
-        final idleDurationTime = (data['IdleDuration'] ?? 0).toInt();
-
+        final idleDurationTime = (data['Ideal Duration'] ?? 0).toInt();
         return Card(
           elevation: 0,
           color: Colors.transparent,

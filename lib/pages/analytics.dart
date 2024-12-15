@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:mpbasic/pages/Data/availability_widget.dart';
+import 'package:mpbasic/pages/Data/co2_energy_widget.dart';
+import 'package:mpbasic/pages/Data/energy_cost_widget.dart';
+import 'package:mpbasic/pages/Data/energy_kw_widget.dart';
 import 'package:mpbasic/pages/Data/oee_widget.dart';
 import 'package:mpbasic/pages/Data/performance_widget.dart';
 import 'package:mpbasic/pages/Data/quality_widget.dart';
+import 'package:mpbasic/pages/Data/temp_and_pH_widget.dart';
 import 'package:mpbasic/pages/home.dart';
 import 'package:mpbasic/pages/process.dart';
 import 'package:mpbasic/pages/ai.dart';
@@ -41,9 +45,15 @@ class _AnalyticsPageState extends State<AnalyticsPage>
       'title': 'Sustainability',
       'header': 'Sustainability',
       'subpages': [
-        {'title': 'Electrical Power'},
-        {'title': 'Water Usage'},
-        {'title': 'Pressurized Air'},
+        {'title': 'CO2 Total'},
+      ]
+    },
+    {
+      'title': 'Energy',
+      'header': 'Energy',
+      'subpages': [
+        {'title': 'Energy(kW/kWh)'},
+        {'title': 'Energy Cost'},
       ]
     },
     {
@@ -51,10 +61,6 @@ class _AnalyticsPageState extends State<AnalyticsPage>
       'header': 'Trends',
       'subpages': [
         {'title': 'Temp/PH'},
-        {'title': 'Total Water Used'},
-        {'title': 'Pressurized Air'},
-        {'title': 'Conductivity & TDS'},
-        {'title': 'Power-Meter'},
         {'title': 'Overall Equipment Effectiveness'},
       ]
     },
@@ -321,10 +327,22 @@ class _AnalyticsPageState extends State<AnalyticsPage>
     if (_selectedSection == 0 && subpage['title'] == 'Quality') {
       return QualityWidget(databaseReference: _databaseReference);
     }
+    if (_selectedSection == 1 && subpage['title'] == 'CO2 Total') {
+      return CO2Widget(databaseReference: _databaseReference);
+    }
+    if (_selectedSection == 2 && subpage['title'] == 'Energy(kW/kWh)') {
+      return EnergyKWWidget(databaseReference: _databaseReference);
+    }
+    if (_selectedSection == 2 && subpage['title'] == 'Energy Cost') {
+      return EnergyCostWidget(databaseReference: _databaseReference);
+    }
 
-    if (_selectedSection == 2 &&
+    if (_selectedSection == 3 &&
         subpage['title'] == 'Overall Equipment Effectiveness') {
       return OEEWidget(databaseReference: _databaseReference);
+    }
+    if (_selectedSection == 3 && subpage['title'] == 'Temp/PH') {
+      return EnvironmentMonitorWidget(databaseReference: _databaseReference);
     }
 
     return Center(
@@ -341,37 +359,50 @@ class _AnalyticsPageState extends State<AnalyticsPage>
   }
 
   Widget _buildDetailsCard(Map<String, dynamic> subpage) {
-  if (_selectedSection == 0 && subpage['title'] == 'Availability') {
-    return AvailabilityDetailsWidget(databaseReference: _databaseReference);
-  }
+    if (_selectedSection == 0 && subpage['title'] == 'Availability') {
+      return AvailabilityDetailsWidget(databaseReference: _databaseReference);
+    }
 
-  if (_selectedSection == 0 && subpage['title'] == 'Performance') {
-    return PerformanceDetailsWidget(databaseReference: _databaseReference);
-  }
+    if (_selectedSection == 0 && subpage['title'] == 'Performance') {
+      return PerformanceDetailsWidget(databaseReference: _databaseReference);
+    }
 
-  if (_selectedSection == 0 && subpage['title'] == 'Quality') {
-    return QualityDetailsWidget(databaseReference: _databaseReference);
-  }
+    if (_selectedSection == 0 && subpage['title'] == 'Quality') {
+      return QualityDetailsWidget(databaseReference: _databaseReference);
+    }
 
-  if (_selectedSection == 2 &&
-      subpage['title'] == 'Overall Equipment Effectiveness') {
-    return OEEDetailsWidget(databaseReference: _databaseReference);
-  }
+    if (_selectedSection == 1 && subpage['title'] == 'CO2 Total') {
+      return CO2DetailsWidget(databaseReference: _databaseReference);
+    }
 
-  return Card(
-    elevation: 0,
-    color: Colors.transparent,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Text(
-        'Details for ${subpage['title']}',
-        style: const TextStyle(
-          fontSize: 16,
-          color: Colors.white,
+    if (_selectedSection == 2 && subpage['title'] == 'Energy(kW/kWh)') {
+      return EnergyDetailsWidget(databaseReference: _databaseReference);
+    }
+    if (_selectedSection == 2 && subpage['title'] == 'Energy Cost') {
+      return EDetailsWidget(databaseReference: _databaseReference);
+    }
+    if (_selectedSection == 3 && subpage['title'] == 'Temp/PH') {
+      return TempPHDetailsWidget(databaseReference: _databaseReference);
+    }
+    if (_selectedSection == 3 &&
+        subpage['title'] == 'Overall Equipment Effectiveness') {
+      return OEETimeSeriesWidget(databaseReference: _databaseReference);
+    }
+
+    return Card(
+      elevation: 0,
+      color: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          'Details for ${subpage['title']}',
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
-    }
