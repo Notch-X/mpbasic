@@ -91,7 +91,7 @@ class EnvironmentMonitorWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        '${temperatureValue.toString()}°C',
+                        '${double.parse(temperatureValue.toString()).toStringAsFixed(1)}°C',
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
@@ -392,7 +392,7 @@ class _TempPHDetailsWidgetState extends State<TempPHDetailsWidget> {
               isCurved: true,
               gradient: LinearGradient(
                 colors: [
-                  color,
+                  color.withOpacity(0.7),
                   color,
                 ],
               ),
@@ -405,7 +405,7 @@ class _TempPHDetailsWidgetState extends State<TempPHDetailsWidget> {
                     radius: 3,
                     color: Colors.white,
                     strokeWidth: 2,
-                    strokeColor: color,
+                    strokeColor: color.withOpacity(0.8),
                   );
                 },
               ),
@@ -413,8 +413,8 @@ class _TempPHDetailsWidgetState extends State<TempPHDetailsWidget> {
                 show: true,
                 gradient: LinearGradient(
                   colors: [
-                    color,
-                    color,
+                    color.withOpacity(0.3),
+                    color.withOpacity(0.1),
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
