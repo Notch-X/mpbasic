@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +12,7 @@ import 'package:mpbasic/pages/home.dart';
 import 'package:mpbasic/pages/alerts.dart';
 import 'package:mpbasic/pages/message.dart';
 import 'package:mpbasic/pages/themesNotifier.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class AIChatbotPage extends ConsumerStatefulWidget {
   const AIChatbotPage({super.key});
@@ -75,40 +75,73 @@ class _AIChatbotPageState extends ConsumerState<AIChatbotPage> {
     }
   }
 
-callGeminiModel() async {
-  try {
-    // Ensure the text is captured before clearing the controller
-    final prompt = _controller.text.trim();
+  // New method to fetch data from Firebase
+  Future<Map<String, dynamic>> _fetchFirebaseData() async {
+    try {
+      DatabaseReference ref = FirebaseDatabase.instance.ref();
+      DataSnapshot snapshot = await ref.child('set').get();
+      
+      if (snapshot.exists) {
+        return snapshot.value as Map<String, dynamic>;
+      }
+      return {};
+    } catch (e) {
+      print("Error fetching Firebase data: $e");
+      return {};
+    }
+  }
 
-    if (prompt.isNotEmpty) {
+  // Enhanced Gemini model call with optional Firebase data integration
+  callGeminiModel({bool includeAnalytics = false}) async {
+    try {
+      // Ensure the text is captured before clearing the controller
+      final prompt = _controller.text.trim();
+
+      if (prompt.isNotEmpty) {
+        setState(() {
+          _messages.add(Message(text: prompt, isUser: true));
+          _isLoading = true;
+        });
+
+        // Clear the input box only after capturing the prompt
+        _controller.clear();
+
+        // Optionally fetch Firebase data
+        Map<String, dynamic> firebaseData = {};
+        if (includeAnalytics) {
+          firebaseData = await _fetchFirebaseData();
+        }
+
+        // Prepare the full prompt
+        String fullPrompt = prompt;
+        if (includeAnalytics && firebaseData.isNotEmpty) {
+          fullPrompt += "\n\nAdditional Context from Manufacturing Data:\n${firebaseData.toString()}";
+        }
+
+        // Instantiate the model with the correct parameters
+        final model = GenerativeModel(
+          model: 'gemini-1.5-pro', 
+          apiKey: dotenv.env['GOOGLE_API_KEY']!
+        );
+        
+        final content = [Content.text(fullPrompt)];
+        final response = await model.generateContent(content);
+
+        setState(() {
+          _messages.add(Message(text: response.text!, isUser: false));
+          _isLoading = false;
+        });
+      }
+    } catch (e, stacktrace) {
+      print("Error calling Generative AI: $e");
+      print("Stacktrace: $stacktrace");
       setState(() {
-        _messages.add(Message(text: prompt, isUser: true));
-        _isLoading = true;
-      });
-
-      // Clear the input box only after capturing the prompt
-      _controller.clear();
-
-      // Instantiate the model with the correct parameters
-      final model = GenerativeModel(model: 'gemini-1.5-pro', apiKey: dotenv.env['GOOGLE_API_KEY']!);
-      final content = [Content.text(prompt)];
-      final response = await model.generateContent(content);
-
-      setState(() {
-        _messages.add(Message(text: response.text!, isUser: false));
         _isLoading = false;
+        _messages.add(Message(text: "Error: Unable to fetch response.", isUser: false));
       });
     }
-  } catch (e, stacktrace) {
-    print("Error calling Generative AI: $e");
-    print("Stacktrace: $stacktrace");
-    setState(() {
-      _isLoading = false;
-      _messages.add(Message(text: "Error: Unable to fetch response.", isUser: false));
-    });
   }
-}
-
+  
 
   @override
   Widget build(BuildContext context) {
@@ -132,53 +165,56 @@ callGeminiModel() async {
                   child: Column(
                     children: [
                       Expanded(
-  child: ListView.builder(
-    itemCount: _messages.length,
-    itemBuilder: (context, index) {
-      final message = _messages[index];
-      return ListTile(
-        title: Align(
-          alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
-          child: Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: message.isUser
-                  ? Theme.of(context).colorScheme.primary // User bubble color
-                  : Colors.white, // AI bubble color
-              borderRadius: message.isUser
-                  ? BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                      bottomLeft: Radius.circular(20),
-                    )
-                  : BorderRadius.only(
-                      topRight: Radius.circular(20),
-                      topLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                    ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: Offset(0, 2), // Optional: Add shadow for a raised effect
-                ),
-              ],
-            ),
-            child: Text(
-              message.text,
-              style: TextStyle(
-                color: message.isUser ? Colors.white : Colors.black, // Text color
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
-      );
-    },
-  ),
-),
-
+                        child: ListView.builder(
+                          itemCount: _messages.length,
+                          itemBuilder: (context, index) {
+                            final message = _messages[index];
+                            return ListTile(
+                              title: Align(
+                                alignment: message.isUser 
+                                    ? Alignment.centerRight 
+                                    : Alignment.centerLeft,
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: message.isUser
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.white,
+                                    borderRadius: message.isUser
+                                        ? BorderRadius.only(
+                                            topLeft: Radius.circular(20),
+                                            bottomRight: Radius.circular(20),
+                                            bottomLeft: Radius.circular(20),
+                                          )
+                                        : BorderRadius.only(
+                                            topRight: Radius.circular(20),
+                                            topLeft: Radius.circular(20),
+                                            bottomRight: Radius.circular(20),
+                                          ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        spreadRadius: 2,
+                                        blurRadius: 4,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    message.text,
+                                    style: TextStyle(
+                                      color: message.isUser 
+                                          ? Colors.white 
+                                          : Colors.black,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(
                           bottom: 32,
@@ -217,22 +253,38 @@ callGeminiModel() async {
                                 ),
                               ),
                               SizedBox(width: 8),
-                              _isLoading
-                                  ? Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    )
-                                  : Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: GestureDetector(
-                                        child: Image.asset('assets/send.png'),
-                                        onTap: callGeminiModel,
-                                      ),
-                                    ),
+                              Row(
+                                children: [
+                                  // Regular Chat Button
+                                  _isLoading
+                                      ? Padding(
+                                          padding: EdgeInsets.all(8),
+                                          child: SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        )
+                                      : Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: GestureDetector(
+                                            child: Icon(Icons.send, color: Colors.blue),
+                                            onTap: () => callGeminiModel(includeAnalytics: false),
+                                          ),
+                                        ),
+                                  
+                                  // Analytics-Integrated Chat Button
+                                  _isLoading
+                                      ? SizedBox.shrink()
+                                      : Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: GestureDetector(
+                                            child: Icon(Icons.analytics, color: Colors.green),
+                                            onTap: () => callGeminiModel(includeAnalytics: true),
+                                          ),
+                                        ),
+                                ],
+                              ),
                             ],
                           ),
                         ),

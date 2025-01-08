@@ -45,7 +45,7 @@ class _ProcessPageState extends State<ProcessPage> {
 
   Future<void> sendStateToFlask() async {
     try {
-      final url = Uri.parse('http://10.0.2.2:5000');
+      final url = Uri.parse('https://10.64.27.251:5000');
 
       final response = await http
           .post(
