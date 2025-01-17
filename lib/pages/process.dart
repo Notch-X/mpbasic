@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:mpbasic/pages/UI/UX/background_widget.dart';
 import 'package:mpbasic/pages/UI/UX/bottom_app_bar_widget.dart';
 import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
 import 'package:mpbasic/pages/home.dart';
@@ -45,7 +44,10 @@ class _ProcessPageState extends State<ProcessPage> {
 
   Future<void> sendStateToFlask() async {
     try {
-      final url = Uri.parse('https://10.64.27.251:5000');
+      //final url = Uri.parse('http://10.0.2.2:5000'); // IP address for mobile emulator
+     // final url = Uri.parse('http://10.64.27.251:5000'); // IP address for Clarence andriod
+      final url = Uri.parse('http: //192.168.250.122:5000');
+    
 
       final response = await http
           .post(

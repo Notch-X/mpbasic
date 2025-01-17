@@ -9,16 +9,15 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-    WidgetsFlutterBinding.ensureInitialized();
-    
-    await dotenv.load(fileName: ".env");
-    runApp(const ProviderScope(child: MyApp()));
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await dotenv.load(fileName: ".env");
+  runApp(const ProviderScope(child: MyApp()));
 
   // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
 }
 
 class MyApp extends ConsumerWidget {
@@ -36,6 +35,5 @@ class MyApp extends ConsumerWidget {
       themeMode: themeMode,
       home: Onboarding(),
     );
-    
   }
 }
