@@ -1,5 +1,10 @@
 from flask import Flask, jsonify, request
 from opcua import Client
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
@@ -8,138 +13,127 @@ opcua_client = Client("opc.tcp://192.168.250.11:4840")
 
 try:
     opcua_client.connect()
-    print("Successfully connected to OPC UA server")
+    logger.info("Successfully connected to OPC UA server")
 except Exception as e:
-    print(f"Failed to connect to OPC UA server: {e}")
+    logger.error(f"Failed to connect to OPC UA server: {e}")
 
-# Define the Node IDs for each mode and valve
-mode_nodes = {
-    "auto": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_AUTO_PB"), # Main Process Page Auto Button
-    "stop": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_STOP_PB"), # Main Process Page Stop Button
-    "manual": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_MANUAL_PB"), # Main Process Page Manual Button
-    # ==================================================================================================================================================
-    # Manual Valves in PROGRESS
-    "supply_pump": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Supply_Pump"), # Module 1 Water Supply Pump/Valve
-    "stock_valve": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Stock_Valve"), #Module 2 Valve for Stock valve
-    "diluent_valve": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Diluent_Valve"),  # Module 2 Valve for Diluent valve
-    "stock_mixer": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Stock_Mixer"), #Module 2 Valve for Stock (Mixer)
-    "diluent_mixer": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Diluent_Mixer_Valve"), #Module 3 Valve from Diluent to Mixer
-    "stock_mixerur_valve": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Stock_Mixer_Valve"),  # Module 3 Valve from Stock to Mixer
-    "mixer_tank": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Mixer_Tank_Mixer"),  # Module 3 Valve from Mixer in Mixer Tank
-    "mixer_output": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Mixer_Output_Valve"), # Module 3 Mixer Tank Valve
-    "mixer_bottle": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Mixer_To_Bottle"), # Module 4  Valve inbetween the Mixer and Bottles, V16 valve
-    "mixer_pump": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Mixer_Pump"), # Module 4 Valve for Mixer Pump
-    "bottle_valve1": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Valve1"),  # Module 4 : Bottle 1
-    "bottle_valve2": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Valve2"),  # Module 4 : Bottle 2
-    "bottle_valve3": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Valve3"),  # Module 4 : Bottle 3
-    "bottle_valve4": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Valve4"),  # Module 4 : Bottle 4
-    "bottle_valve5": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Valve5"),  # Module 4 : Bottle 5
-    "bottle_valve6": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Valve6"),  # Module 4 : Bottle 6
-    "bottle_valve7": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Valve7"),  # Module 4 : Bottle 7
-    "bottle_valve8": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Valve8"),  # Module 4 : Bottle 8
-    "bottle_valve9": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Valve9"),  # Module 4 : Bottle 9
-    "bottle_valve10": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Valve10"),  # Module 4 : Bottle 10
-    "v18_valve": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Waste_Valve1"), # Module 5 Valve 18
-    "v19_valve": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Waste_Valve2"), # Module 5 Valve 19
-    "bottle_tray": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Tray_Waste"),  # Module 6 Waste Bottle Tray
-    # ==================================================================================================================================================
+# Define all nodes with their OPC UA addresses
+node_definitions = {
+    # Mode controls
+    "auto": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_AUTO_PB",
+    "stop": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_STOP_PB",
+    "manual": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_MANUAL_PB",
+    
+    # Module 1
+    "supply_pump": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Supply_Pump",
+    
+    # Module 2
+    "stock_valve": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Stock_Valve",
+    "diluent_valve": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Diluent_Valve",
+    "stock_mixer": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Stock_Mixer",
+    
+    # Module 3
+    "diluent_mixer": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Diluent_Mixer_Valve",
+    "stock_mixer_valve": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Stock_Mixer_Valve",
+    "mixer_tank": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Mixer_Tank_Mixer",
+    "mixer_output": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Mixer_Output_Valve",
+    
+    # Module 4
+    "mixer_bottle": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Mixer_To_Bottle",
+    "mixer_pump": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Mixer_Pump",
+    
+    # Waste valves
+    "v18_valve": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Waste_Valve1",
+    "v19_valve": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Waste_Valve2",
+    "bottle_tray": "ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Tray_Waste"
 }
 
-def set_mode_state(mode, state):
-    """Helper function to set the mode state on OPC UA server"""
+# Add bottle valves
+for i in range(1, 11):
+    node_definitions[f"bottle_valve{i}"] = f"ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Valve{i}"
+
+# Create OPC UA nodes dictionary
+mode_nodes = {name: opcua_client.get_node(address) for name, address in node_definitions.items()}
+
+def set_node_value(node_name, state):
+    """Set value for a node with error handling"""
     try:
-        node = mode_nodes.get(mode)
-        if node:
-            node.set_value(state)
-            print(f"Set {mode} to {state}")
-            return True
-        return False
+        node = mode_nodes.get(node_name)
+        if not node:
+            logger.error(f"Node not found: {node_name}")
+            return False
+        node.set_value(state)
+        logger.info(f"Successfully set {node_name} to {state}")
+        return True
     except Exception as e:
-        print(f"Error setting {mode}: {e}")
+        logger.error(f"Error setting {node_name}: {e}")
         return False
 
-@app.route('/', methods=['POST'])
-def control_mode():
+def control_component(component_name):
+    """Generic component control function"""
     try:
-        # Get the button states from the request
-        data = request.json
-        print(f"Received data: {data}")
+        data = request.get_json()
+        state = data.get('state')
         
-        # Set the state for each mode based on the button presses
-        success = True
-        if data.get("button1"):
-            success = all([
-                set_mode_state("auto", True),
-                set_mode_state("stop", False),
-                set_mode_state("manual", False)
-            ])
-        elif data.get("button2"):
-            success = all([
-                set_mode_state("auto", False),
-                set_mode_state("stop", True),
-                set_mode_state("manual", False)
-            ])
-        elif data.get("button3"):
-            success = all([
-                set_mode_state("auto", False),
-                set_mode_state("stop", False),
-                set_mode_state("manual", True)
-            ])
+        if state is None:
+            return jsonify({"status": "error", "message": "State not provided"}), 400
         
-        if success:
+        if set_node_value(component_name, state):
             return jsonify({
                 "status": "success",
-                "message": "Mode updated successfully"
+                "message": f"Successfully set {component_name} to {state}"
             })
-        else:
-            return jsonify({
-                "status": "error",
-                "message": "Failed to update mode"
-            }), 500
-            
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to set {component_name}"
+        }), 500
     except Exception as e:
-        print(f"Error processing request: {e}")
+        logger.error(f"Error controlling {component_name}: {e}")
         return jsonify({
             "status": "error",
             "message": str(e)
         }), 500
 
+# Create all routes dynamically
+for component_name in mode_nodes.keys():
+    if component_name not in ['auto', 'stop', 'manual']:  # Skip mode controls
+        app.add_url_rule(
+            f'/{component_name}',
+            f'control_{component_name}',
+            lambda x=component_name: control_component(x),
+            methods=['POST']
+        )
+
+# Mode control endpoint
+@app.route('/', methods=['POST'])
+def control_mode():
+    """Handle mode switching between auto, stop, and manual"""
+    try:
+        data = request.json
+        logger.info(f"Received mode control request: {data}")
+        
+        if data.get("button1"):  # Auto mode
+            states = {"auto": True, "stop": False, "manual": False}
+        elif data.get("button2"):  # Stop mode
+            states = {"auto": False, "stop": True, "manual": False}
+        elif data.get("button3"):  # Manual mode
+            states = {"auto": False, "stop": False, "manual": True}
+        else:
+            return jsonify({"status": "error", "message": "Invalid button state"}), 400
+
+        success = all(set_node_value(mode, state) for mode, state in states.items())
+        return jsonify({
+            "status": "success" if success else "error",
+            "message": "Mode updated successfully" if success else "Failed to update mode"
+        })
+    except Exception as e:
+        logger.error(f"Error in mode control: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/health', methods=['GET'])
 def health_check():
-    """Endpoint to check if the server is running"""
+    """Health check endpoint"""
     return jsonify({"status": "healthy"})
-
-# Dynamically create routes for each valve
-valve_routes = [
-    "supply_pump", "stock_valve", "diluent_valve", "stock_mixer", "diluent_mixer",
-    "stock_mixerur_valve", "mixer_tank", "mixer_output", "mixer_bottle", "mixer_pump",
-    "bottle_valve1", "bottle_valve2", "bottle_valve3", "bottle_valve4", "bottle_valve5",
-    "bottle_valve6", "bottle_valve7", "bottle_valve8", "bottle_valve9", "bottle_valve10",
-    "v18_valve", "v19_valve", "bottle_tray"
-]
-
-for route in valve_routes:
-    @app.route(f'/{route}', methods=['POST'])
-    def control_valve(route=route):
-        try:
-            data = request.get_json()
-            control = data.get('control')
-            state = data.get('state')
-
-            # Process the control and state as needed
-            print(f"Received control: {control}, state: {state}")
-
-            # Example: Write to the OPC UA node
-            node = mode_nodes.get(route)
-            if node:
-                node.set_value(state)
-                print(f"Set {control} to {state}")
-
-            # Respond with a success message
-            return jsonify({'message': 'Control updated successfully'}), 200
-        except Exception as e:
-            print(f"Error: {e}")
-            return jsonify({'message': 'Failed to update control'}), 500
 
 if __name__ == '__main__':
     try:
