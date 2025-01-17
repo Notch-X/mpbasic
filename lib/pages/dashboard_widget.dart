@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class DashboardWidget extends StatelessWidget {
-  const DashboardWidget({super.key});
+  final DatabaseReference databaseReference;
+
+  const DashboardWidget({
+    super.key,
+    required this.databaseReference,
+  });
 
   Widget _buildMetricCard(
       String title, String value, IconData icon, Color color) {
@@ -65,93 +72,156 @@ class DashboardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Environmental Impact Section
-          const Text(
-            'Environmental Impact',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          _buildMetricCard('Trees', '90', Icons.park, Colors.green),
-          const SizedBox(height: 8),
-          _buildMetricCard(
-              'Wildlife Affected', '18', Icons.pets, Colors.orange),
+    return StreamBuilder(
+      stream: databaseReference.child('set').onValue,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.blue),
+          );
+        }
 
-          // Resources Section
-          const SizedBox(height: 24),
-          const Text(
-            'Resources',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error}',
+              style: const TextStyle(color: Colors.red),
             ),
-          ),
-          const SizedBox(height: 12),
-          _buildMetricCard(
-              'Total Energy', '415 kWh', Icons.bolt, Colors.yellow),
-          const SizedBox(height: 8),
-          _buildMetricCard('Total Air', '0 L/min', Icons.air, Colors.blue),
+          );
+        }
 
-          // Carbon Impact Section
-          const SizedBox(height: 24),
-          const Text(
-            'Carbon Impact',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+        if (!snapshot.hasData || snapshot.data?.snapshot.value == null) {
+          return const Center(
+            child: Text(
+              'No data available',
+              style: TextStyle(color: Colors.white),
             ),
-          ),
-          const SizedBox(height: 12),
-          _buildMetricCard(
-              'Carbon Expense', '12.0 SGD', Icons.attach_money, Colors.green),
-          const SizedBox(height: 8),
-          _buildMetricCard(
-              'Carbon Emission', '2.4 TONS', Icons.cloud, Colors.grey),
+          );
+        }
 
-          // Performance Indicators
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Overall Equipment Effectiveness (OEE)',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+        final set =
+            Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
+
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Bottle Efficiency Section
+              const Text(
+                'Bottle Efficiency',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+              ),
+              const SizedBox(height: 12),
+              _buildMetricCard(
+                  'Good Bottles',
+                  set['Good Bottles']?.toString() ?? '0',
+                  FontAwesomeIcons
+                      .bottleWater, // This will give you a bottle icon
+                  Colors.green),
+              const SizedBox(height: 8),
+              _buildMetricCard(
+                  'Bad Bottles',
+                  set['Bad Bottles']?.toString() ?? '0',
+                  FontAwesomeIcons
+                      .bottleWater, // This will give you a bottle icon
+                  Colors.red),
+
+              // Resources Section
+              const SizedBox(height: 24),
+              const Text(
+                'Resources',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildMetricCard(
+                  'Total Energy',
+                  '${set['kWh']?.toString() ?? '0'} kWh',
+                  Icons.bolt,
+                  Colors.yellow),
+              const SizedBox(height: 8),
+              _buildMetricCard(
+                  'Total Compressed Air',
+                  '${set['Total Compressed Air']?.toString() ?? '0'} Pa',
+                  Icons.air,
+                  Colors.blue),
+
+              // Carbon Impact Section
+              const SizedBox(height: 24),
+              const Text(
+                'Carbon Impact',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildMetricCard(
+                  'Carbon Expense',
+                  '${set['kWh Cost']?.toString() ?? '0'} SGD',
+                  Icons.attach_money,
+                  Colors.green),
+              const SizedBox(height: 8),
+              _buildMetricCard(
+                  'Carbon Emission',
+                  '${set['CO2 Total']?.toString() ?? '0'} TONS',
+                  Icons.cloud,
+                  Colors.grey),
+
+              // Performance Indicators
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildPerformanceIndicator('Dosing', 75, Colors.green),
-                    _buildPerformanceIndicator('Mixing', 55, Colors.blue),
-                    _buildPerformanceIndicator('Brewing', 75, Colors.orange),
-                    _buildPerformanceIndicator('Filling', 65, Colors.purple),
+                    const Text(
+                      'Overall Equipment Effectiveness (OEE)',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildPerformanceIndicator(
+                            'Availability',
+                            double.parse(
+                                set['Availability']?.toString() ?? '0'),
+                            Colors.green),
+                        _buildPerformanceIndicator(
+                            'Performance',
+                            double.parse(set['Performance']?.toString() ?? '0'),
+                            Colors.blue),
+                        _buildPerformanceIndicator(
+                            'Quality',
+                            double.parse(set['Quality']?.toString() ?? '0'),
+                            Colors.orange),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
