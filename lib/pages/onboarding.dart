@@ -44,7 +44,7 @@ class Onboarding extends StatelessWidget {
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => const HomePage()),
+                  MaterialPageRoute(builder: (context) => HomePage()),
                   (route) => false,
                 );
               },
@@ -53,7 +53,8 @@ class Onboarding extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                 ),
                 padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                backgroundColor: Colors.purple, // Button background color set to purple
+                backgroundColor:
+                    Colors.purple, // Button background color set to purple
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
