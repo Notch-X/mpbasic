@@ -6,7 +6,6 @@ import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
 import 'package:mpbasic/pages/analytics.dart';
 import 'package:mpbasic/pages/process.dart';
 import 'package:mpbasic/pages/ai.dart';
-import 'package:mpbasic/pages/alerts.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'dashboard_widget.dart'; // Import the DashboardWidget
 
@@ -77,12 +76,7 @@ class _HomePageState extends State<HomePage> {
           MaterialPageRoute(builder: (context) => const AIChatbotPage()),
         );
         break;
-      case 'Alerts':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AlertPage()),
-        );
-        break;
+     
     }
   }
 

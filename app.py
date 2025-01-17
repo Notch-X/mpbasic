@@ -5,9 +5,11 @@ app = Flask(__name__)
 
 # Create OPC UA client connection
 opcua_client = Client("opc.tcp://192.168.250.11:4840")
+opcua_connected = False
 
 try:
     opcua_client.connect()
+    opcua_connected = True
     print("Successfully connected to OPC UA server")
 except Exception as e:
     print(f"Failed to connect to OPC UA server: {e}")
@@ -146,4 +148,5 @@ if __name__ == '__main__':
     try:
         app.run(host='0.0.0.0', port=5000, debug=True)
     finally:
-        opcua_client.disconnect()
+        if opcua_connected:
+            opcua_client.disconnect()

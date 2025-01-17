@@ -6,7 +6,6 @@ import 'package:mpbasic/pages/UI/UX/bottom_app_bar_widget.dart';
 import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
 import 'package:mpbasic/pages/home.dart';
 import 'package:mpbasic/pages/ai.dart';
-import 'package:mpbasic/pages/alerts.dart';
 import 'package:mpbasic/pages/analytics.dart';
 import 'package:mpbasic/pages/manual_mode.dart';
 
@@ -44,11 +43,11 @@ class _ProcessPageState extends State<ProcessPage> {
 
   Future<void> sendStateToFlask() async {
     try {
-       // final url = Uri.parse('http://10.75.99.51:5000')2/; // IP address for mobile emulator
-       final url = Uri.parse('http://10.0.2.2:5000'); // IP address for default mobile emulator
-       // final url = Uri.parse('http://10.64.27.251:5000'); // IP address for Clarence andriod
+      // final url = Uri.parse('http://10.75.99.51:5000')2/; // IP address for mobile emulator
+      final url = Uri.parse(
+          'http://10.0.2.2:5000'); // IP address for default mobile emulator
+      // final url = Uri.parse('http://10.64.27.251:5000'); // IP address for Clarence andriod
       //final url = Uri.parse('http: //192.168.250.122:5000'); // Default IP address for emulator
-    
 
       final response = await http
           .post(
@@ -311,7 +310,6 @@ class _ProcessPageState extends State<ProcessPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: isToggled
                   ? const Color(0xFF66C7C7)
-                  
                   : Colors.grey.withOpacity(0.3),
               padding: const EdgeInsets.symmetric(
                 horizontal: 20,
@@ -360,12 +358,6 @@ class _ProcessPageState extends State<ProcessPage> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AnalyticsPage()),
-        );
-        break;
-      case 'Alerts':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AlertPage()),
         );
         break;
       case 'Manual':

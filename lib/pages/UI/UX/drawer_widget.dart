@@ -61,8 +61,6 @@ class DrawerWidget extends StatelessWidget {
                   () => navigateToPage('Analytics', context)),
               buildDrawerItem(Icons.chat_bubble, 'AI ChatBot',
                   () => navigateToPage('Chat', context)),
-              buildDrawerItem(Icons.notifications, 'Alerts',
-                  () => navigateToPage('Alerts', context)),
               const Divider(color: Colors.white30),
             ],
           ),

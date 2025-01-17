@@ -11,7 +11,7 @@ import 'package:mpbasic/pages/Data/temp_and_pH_widget.dart';
 import 'package:mpbasic/pages/home.dart';
 import 'package:mpbasic/pages/process.dart';
 import 'package:mpbasic/pages/ai.dart';
-import 'package:mpbasic/pages/alerts.dart';
+
 import 'package:mpbasic/pages/UI/UX/background_widget.dart';
 import 'package:mpbasic/pages/UI/UX/bottom_app_bar_widget.dart';
 import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
@@ -137,12 +137,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
           MaterialPageRoute(builder: (context) => const AnalyticsPage()),
         );
         break;
-      case 'Alerts':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AlertPage()),
-        );
-        break;
+    
     }
   }
 
