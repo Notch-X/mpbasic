@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 class DrawerWidget extends StatelessWidget {
   final Function(String, BuildContext) navigateToPage;
 
-  const DrawerWidget({Key? key, required this.navigateToPage})
-      : super(key: key);
+  const DrawerWidget({super.key, required this.navigateToPage});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +32,7 @@ class DrawerWidget extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
-                          colors: [Color(0xFF6A1B9A), Color(0xFF283593)],
+                          colors: const [Color(0xFF6A1B9A), Color(0xFF283593)],
                         ),
                       ),
                       child: const Icon(

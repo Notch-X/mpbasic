@@ -3,8 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 
 class AvailabilityWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
-  const AvailabilityWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const AvailabilityWidget({super.key, required this.databaseReference});
   String _formatDuration(int minutes) {
     int hours = minutes ~/ 60;
     int remainingMinutes = minutes % 60;
@@ -103,8 +102,7 @@ class AvailabilityWidget extends StatelessWidget {
 
 class AvailabilityDetailsWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
-  const AvailabilityDetailsWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const AvailabilityDetailsWidget({super.key, required this.databaseReference});
   String _formatDuration(int minutes) {
     int hours = minutes ~/ 60;
     int remainingMinutes = minutes % 60;

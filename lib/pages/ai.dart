@@ -26,11 +26,15 @@ class _AIChatbotPageState extends ConsumerState<AIChatbotPage> {
   final List<Message> _messages = [];
   bool _isLoading = false;
   List<CategoryModel> categories = [];
+  Map<String, dynamic> _cachedFirebaseData = {};
+  bool _isLoadingFirebase = false;
 
   @override
   void initState() {
     super.initState();
     _getCategories();
+    // Pre-fetch Firebase data
+    _fetchFirebaseData();
   }
 
   void _getCategories() {
@@ -75,73 +79,115 @@ class _AIChatbotPageState extends ConsumerState<AIChatbotPage> {
     }
   }
 
-  // New method to fetch data from Firebase
   Future<Map<String, dynamic>> _fetchFirebaseData() async {
+    if (_isLoadingFirebase) return _cachedFirebaseData;
+    
+    setState(() => _isLoadingFirebase = true);
+    
     try {
       DatabaseReference ref = FirebaseDatabase.instance.ref();
       DataSnapshot snapshot = await ref.child('set').get();
       
       if (snapshot.exists) {
-        return snapshot.value as Map<String, dynamic>;
+        _cachedFirebaseData = Map<String, dynamic>.from(snapshot.value as Map);
+        return _cachedFirebaseData;
       }
       return {};
     } catch (e) {
       print("Error fetching Firebase data: $e");
       return {};
+    } finally {
+      setState(() => _isLoadingFirebase = false);
     }
   }
 
-  // Enhanced Gemini model call with optional Firebase data integration
-  callGeminiModel({bool includeAnalytics = false}) async {
-    try {
-      // Ensure the text is captured before clearing the controller
-      final prompt = _controller.text.trim();
-
-      if (prompt.isNotEmpty) {
-        setState(() {
-          _messages.add(Message(text: prompt, isUser: true));
-          _isLoading = true;
+  String _formatFirebaseData(Map<String, dynamic> data) {
+    StringBuffer formattedData = StringBuffer();
+    formattedData.writeln("\nManufacturing Analytics Data:");
+    
+    data.forEach((key, value) {
+      if (value is Map) {
+        formattedData.writeln("$key:");
+        (value).forEach((k, v) {
+          formattedData.writeln("  - $k: $v");
         });
-
-        // Clear the input box only after capturing the prompt
-        _controller.clear();
-
-        // Optionally fetch Firebase data
-        Map<String, dynamic> firebaseData = {};
-        if (includeAnalytics) {
-          firebaseData = await _fetchFirebaseData();
-        }
-
-        // Prepare the full prompt
-        String fullPrompt = prompt;
-        if (includeAnalytics && firebaseData.isNotEmpty) {
-          fullPrompt += "\n\nAdditional Context from Manufacturing Data:\n${firebaseData.toString()}";
-        }
-
-        // Instantiate the model with the correct parameters
-        final model = GenerativeModel(
-          model: 'gemini-1.5-pro', 
-          apiKey: dotenv.env['GOOGLE_API_KEY']!
-        );
-        
-        final content = [Content.text(fullPrompt)];
-        final response = await model.generateContent(content);
-
-        setState(() {
-          _messages.add(Message(text: response.text!, isUser: false));
-          _isLoading = false;
-        });
+      } else {
+        formattedData.writeln("$key: $value");
       }
+    });
+    
+    return formattedData.toString();
+  }
+
+  Future<void> _sendRegularMessage() async {
+    await callGeminiModel(includeAnalytics: false);
+  }
+
+  Future<void> _sendAnalyticsMessage() async {
+    await _fetchFirebaseData();
+    await callGeminiModel(includeAnalytics: true);
+  }
+
+  Future<void> callGeminiModel({bool includeAnalytics = false}) async {
+    try {
+      final prompt = _controller.text.trim();
+      if (prompt.isEmpty) return;
+
+      setState(() {
+        _messages.add(Message(text: prompt, isUser: true));
+        _isLoading = true;
+      });
+
+      _controller.clear();
+
+      String fullPrompt = prompt;
+      if (includeAnalytics) {
+        if (_cachedFirebaseData.isNotEmpty) {
+          String formattedData = _formatFirebaseData(_cachedFirebaseData);
+          fullPrompt = """
+Please analyze the following question in the context of our manufacturing data:
+
+Question: $prompt
+
+Manufacturing Data Context:
+$formattedData
+
+Please provide insights based on both the question and the manufacturing data.
+""";
+        } else {
+          setState(() {
+            _messages.add(Message(
+              text: "Unable to fetch analytics data. Proceeding with regular response.",
+              isUser: false,
+            ));
+          });
+        }
+      }
+
+      final model = GenerativeModel(
+        model: 'gemini-1.5-pro',
+        apiKey: dotenv.env['GOOGLE_API_KEY']!
+      );
+      
+      final content = [Content.text(fullPrompt)];
+      final response = await model.generateContent(content);
+
+      setState(() {
+        _messages.add(Message(text: response.text!, isUser: false));
+        _isLoading = false;
+      });
     } catch (e, stacktrace) {
       print("Error calling Generative AI: $e");
       print("Stacktrace: $stacktrace");
       setState(() {
         _isLoading = false;
-        _messages.add(Message(text: "Error: Unable to fetch response.", isUser: false));
+        _messages.add(Message(
+          text: "Error: Unable to fetch response. Please try again.",
+          isUser: false,
+        ));
       });
     }
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -252,39 +298,35 @@ class _AIChatbotPageState extends ConsumerState<AIChatbotPage> {
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 8),
-                              Row(
-                                children: [
-                                  // Regular Chat Button
-                                  _isLoading
-                                      ? Padding(
-                                          padding: EdgeInsets.all(8),
-                                          child: SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        )
-                                      : Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: GestureDetector(
-                                            child: Icon(Icons.send, color: Colors.blue),
-                                            onTap: () => callGeminiModel(includeAnalytics: false),
-                                          ),
-                                        ),
-                                  
-                                  // Analytics-Integrated Chat Button
-                                  _isLoading
-                                      ? SizedBox.shrink()
-                                      : Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: GestureDetector(
-                                            child: Icon(Icons.analytics, color: Colors.green),
-                                            onTap: () => callGeminiModel(includeAnalytics: true),
-                                          ),
-                                        ),
-                                ],
-                              ),
+                              if (_isLoading)
+                                Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              else
+                                Row(
+                                  children: [
+                                    // Regular chat button
+                                    IconButton(
+                                      icon: Icon(Icons.send, color: Colors.blue),
+                                      onPressed: _sendRegularMessage,
+                                      tooltip: 'Send regular message',
+                                    ),
+                                    // Analytics button
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.analytics,
+                                        color: _isLoadingFirebase ? Colors.grey : Colors.green,
+                                      ),
+                                      onPressed: _isLoadingFirebase ? null : _sendAnalyticsMessage,
+                                      tooltip: 'Send with analytics',
+                                    ),
+                                  ],
+                                ),
                             ],
                           ),
                         ),

@@ -6,8 +6,7 @@ import 'dart:async';
 class OEEWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
 
-  const OEEWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const OEEWidget({super.key, required this.databaseReference});
 
   Color _getOEEColor(dynamic oeeValue) {
     double value = double.tryParse(oeeValue.toString()) ?? 0;
@@ -77,7 +76,7 @@ class OEEWidget extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
                 Text(
-                  '${oeeValue.toString()}',
+                  oeeValue.toString(),
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
@@ -130,8 +129,7 @@ class OEEWidget extends StatelessWidget {
 class OEEDetailsWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
 
-  const OEEDetailsWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const OEEDetailsWidget({super.key, required this.databaseReference});
 
   String _getOEEStatus(dynamic oeeValue) {
     double value = double.tryParse(oeeValue.toString()) ?? 0;
@@ -211,8 +209,7 @@ class OEEDetailsWidget extends StatelessWidget {
 class OEETimeSeriesWidget extends StatefulWidget {
   final DatabaseReference databaseReference;
 
-  const OEETimeSeriesWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const OEETimeSeriesWidget({super.key, required this.databaseReference});
 
   @override
   _OEETimeSeriesWidgetState createState() => _OEETimeSeriesWidgetState();

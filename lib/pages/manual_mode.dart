@@ -29,11 +29,11 @@ class ManualModePage extends StatefulWidget {
   final Function(String)? onStatusChanged;
 
   const ManualModePage({
-    Key? key,
+    super.key,
     this.onStatusChanged,
     required int selectedModule,
     required Null Function(dynamic module) onModuleChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<ManualModePage> createState() => _ManualModePageState();

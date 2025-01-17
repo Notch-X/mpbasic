@@ -4,8 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 class EnergyCostWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
 
-  const EnergyCostWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const EnergyCostWidget({super.key, required this.databaseReference});
 
   Color _getECostColor(dynamic value) {
     double eCostVal = double.tryParse(value.toString()) ?? 0;
@@ -104,8 +103,7 @@ class EnergyCostWidget extends StatelessWidget {
 
 class EDetailsWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
-  const EDetailsWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const EDetailsWidget({super.key, required this.databaseReference});
 
   @override
   Widget build(BuildContext context) {
@@ -152,8 +150,8 @@ class EDetailsWidget extends StatelessWidget {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
+              children: const [
+                Text(
                   'Energy Cost Details',
                   style: TextStyle(
                     fontSize: 20,
@@ -161,14 +159,14 @@ class EDetailsWidget extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 15),
+                SizedBox(height: 15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Energy Cost is the cost per kWh',
                           style: TextStyle(
                             fontSize: 16,

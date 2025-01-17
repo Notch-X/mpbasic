@@ -3,8 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 
 class EnergyKWWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
-  const EnergyKWWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const EnergyKWWidget({super.key, required this.databaseReference});
 
   Color _getEnergyColor(dynamic value) {
     double kWValue = double.tryParse(value.toString()) ?? 0;
@@ -98,8 +97,7 @@ class EnergyKWWidget extends StatelessWidget {
 
 class EnergyDetailsWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
-  const EnergyDetailsWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const EnergyDetailsWidget({super.key, required this.databaseReference});
 
   @override
   Widget build(BuildContext context) {
