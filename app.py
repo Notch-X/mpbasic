@@ -115,9 +115,8 @@ valve_routes = [
     "v18_valve", "v19_valve", "bottle_tray"
 ]
 
-for route in valve_routes:
-    @app.route(f'/{route}', methods=['POST'])
-    def control_valve(route=route):
+def create_control_valve_route(route):
+    def control_valve():
         try:
             data = request.get_json()
             control = data.get('control')
@@ -137,6 +136,11 @@ for route in valve_routes:
         except Exception as e:
             print(f"Error: {e}")
             return jsonify({'message': 'Failed to update control'}), 500
+    control_valve.__name__ = f'control_valve_{route}'  # Ensure unique function names
+    return control_valve
+
+for route in valve_routes:
+    app.add_url_rule(f'/{route}', view_func=create_control_valve_route(route), methods=['POST'])
 
 if __name__ == '__main__':
     try:
