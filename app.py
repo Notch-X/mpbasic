@@ -112,7 +112,7 @@ def control_mode():
         data = request.json
         logger.info(f"Received mode control request: {data}")
         
-        if data.get("button1"):  # Auto mode
+        if data.get("button1"):  # Auto mode (default)
             states = {"auto": True, "stop": False, "manual": False}
         elif data.get("button2"):  # Stop mode
             states = {"auto": False, "stop": True, "manual": False}
