@@ -4,8 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 class CO2Widget extends StatelessWidget {
   final DatabaseReference databaseReference;
 
-  const CO2Widget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const CO2Widget({super.key, required this.databaseReference});
 
   Color _getCO2Color(dynamic value) {
     double co2Value = double.tryParse(value.toString()) ?? 0;
@@ -105,8 +104,7 @@ class CO2Widget extends StatelessWidget {
 class CO2DetailsWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
 
-  const CO2DetailsWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const CO2DetailsWidget({super.key, required this.databaseReference});
 
   @override
   Widget build(BuildContext context) {

@@ -6,8 +6,7 @@ import 'dart:async';
 
 class EnvironmentMonitorWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
-  const EnvironmentMonitorWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const EnvironmentMonitorWidget({super.key, required this.databaseReference});
   Color _getTemperatureColor(dynamic value) {
     double temperatureValue = double.tryParse(value.toString()) ?? 0;
     if (temperatureValue <= 0) return Colors.blue;
@@ -193,8 +192,7 @@ class EnvironmentMonitorWidget extends StatelessWidget {
 
 class TempPHDetailsWidget extends StatefulWidget {
   final DatabaseReference databaseReference;
-  const TempPHDetailsWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const TempPHDetailsWidget({super.key, required this.databaseReference});
 
   @override
   _TempPHDetailsWidgetState createState() => _TempPHDetailsWidgetState();

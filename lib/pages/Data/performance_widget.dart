@@ -4,8 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 class PerformanceWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
 
-  const PerformanceWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const PerformanceWidget({super.key, required this.databaseReference});
 
   Color _getPerformanceColor(dynamic value) {
     double performanceValue = double.tryParse(value.toString()) ?? 0;
@@ -107,8 +106,7 @@ class PerformanceWidget extends StatelessWidget {
 class PerformanceDetailsWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
 
-  const PerformanceDetailsWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const PerformanceDetailsWidget({super.key, required this.databaseReference});
 
   @override
   Widget build(BuildContext context) {

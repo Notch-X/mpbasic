@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +12,7 @@ import 'package:mpbasic/pages/home.dart';
 import 'package:mpbasic/pages/alerts.dart';
 import 'package:mpbasic/pages/message.dart';
 import 'package:mpbasic/pages/themesNotifier.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class AIChatbotPage extends ConsumerStatefulWidget {
   const AIChatbotPage({super.key});
@@ -26,11 +26,15 @@ class _AIChatbotPageState extends ConsumerState<AIChatbotPage> {
   final List<Message> _messages = [];
   bool _isLoading = false;
   List<CategoryModel> categories = [];
+  Map<String, dynamic> _cachedFirebaseData = {};
+  bool _isLoadingFirebase = false;
 
   @override
   void initState() {
     super.initState();
     _getCategories();
+    // Pre-fetch Firebase data
+    _fetchFirebaseData();
   }
 
   void _getCategories() {
@@ -75,40 +79,115 @@ class _AIChatbotPageState extends ConsumerState<AIChatbotPage> {
     }
   }
 
-callGeminiModel() async {
-  try {
-    // Ensure the text is captured before clearing the controller
-    final prompt = _controller.text.trim();
+  Future<Map<String, dynamic>> _fetchFirebaseData() async {
+    if (_isLoadingFirebase) return _cachedFirebaseData;
+    
+    setState(() => _isLoadingFirebase = true);
+    
+    try {
+      DatabaseReference ref = FirebaseDatabase.instance.ref();
+      DataSnapshot snapshot = await ref.child('set').get();
+      
+      if (snapshot.exists) {
+        _cachedFirebaseData = Map<String, dynamic>.from(snapshot.value as Map);
+        return _cachedFirebaseData;
+      }
+      return {};
+    } catch (e) {
+      print("Error fetching Firebase data: $e");
+      return {};
+    } finally {
+      setState(() => _isLoadingFirebase = false);
+    }
+  }
 
-    if (prompt.isNotEmpty) {
+  String _formatFirebaseData(Map<String, dynamic> data) {
+    StringBuffer formattedData = StringBuffer();
+    formattedData.writeln("\nManufacturing Analytics Data:");
+    
+    data.forEach((key, value) {
+      if (value is Map) {
+        formattedData.writeln("$key:");
+        (value).forEach((k, v) {
+          formattedData.writeln("  - $k: $v");
+        });
+      } else {
+        formattedData.writeln("$key: $value");
+      }
+    });
+    
+    return formattedData.toString();
+  }
+
+  Future<void> _sendRegularMessage() async {
+    await callGeminiModel(includeAnalytics: false);
+  }
+
+  Future<void> _sendAnalyticsMessage() async {
+    await _fetchFirebaseData();
+    await callGeminiModel(includeAnalytics: true);
+  }
+
+  Future<void> callGeminiModel({bool includeAnalytics = false}) async {
+    try {
+      final prompt = _controller.text.trim();
+      if (prompt.isEmpty) return;
+
       setState(() {
         _messages.add(Message(text: prompt, isUser: true));
         _isLoading = true;
       });
 
-      // Clear the input box only after capturing the prompt
       _controller.clear();
 
-      // Instantiate the model with the correct parameters
-      final model = GenerativeModel(model: 'gemini-1.5-pro', apiKey: dotenv.env['GOOGLE_API_KEY']!);
-      final content = [Content.text(prompt)];
+      String fullPrompt = prompt;
+      if (includeAnalytics) {
+        if (_cachedFirebaseData.isNotEmpty) {
+          String formattedData = _formatFirebaseData(_cachedFirebaseData);
+          fullPrompt = """
+Please analyze the following question in the context of our manufacturing data:
+
+Question: $prompt
+
+Manufacturing Data Context:
+$formattedData
+
+Please provide insights based on both the question and the manufacturing data.
+""";
+        } else {
+          setState(() {
+            _messages.add(Message(
+              text: "Unable to fetch analytics data. Proceeding with regular response.",
+              isUser: false,
+            ));
+          });
+        }
+      }
+
+      final model = GenerativeModel(
+        model: 'gemini-1.5-pro',
+        apiKey: dotenv.env['GOOGLE_API_KEY']!
+      );
+      
+      final content = [Content.text(fullPrompt)];
       final response = await model.generateContent(content);
 
       setState(() {
         _messages.add(Message(text: response.text!, isUser: false));
         _isLoading = false;
       });
+    } catch (e, stacktrace) {
+      print("Error calling Generative AI: $e");
+      print("Stacktrace: $stacktrace");
+      setState(() {
+        _isLoading = false;
+        _messages.add(Message(
+          text: "Error: Unable to fetch response. Please try again.",
+          isUser: false,
+        ));
+      });
     }
-  } catch (e, stacktrace) {
-    print("Error calling Generative AI: $e");
-    print("Stacktrace: $stacktrace");
-    setState(() {
-      _isLoading = false;
-      _messages.add(Message(text: "Error: Unable to fetch response.", isUser: false));
-    });
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -132,53 +211,56 @@ callGeminiModel() async {
                   child: Column(
                     children: [
                       Expanded(
-  child: ListView.builder(
-    itemCount: _messages.length,
-    itemBuilder: (context, index) {
-      final message = _messages[index];
-      return ListTile(
-        title: Align(
-          alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
-          child: Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: message.isUser
-                  ? Theme.of(context).colorScheme.primary // User bubble color
-                  : Colors.white, // AI bubble color
-              borderRadius: message.isUser
-                  ? BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                      bottomLeft: Radius.circular(20),
-                    )
-                  : BorderRadius.only(
-                      topRight: Radius.circular(20),
-                      topLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                    ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: Offset(0, 2), // Optional: Add shadow for a raised effect
-                ),
-              ],
-            ),
-            child: Text(
-              message.text,
-              style: TextStyle(
-                color: message.isUser ? Colors.white : Colors.black, // Text color
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ),
-      );
-    },
-  ),
-),
-
+                        child: ListView.builder(
+                          itemCount: _messages.length,
+                          itemBuilder: (context, index) {
+                            final message = _messages[index];
+                            return ListTile(
+                              title: Align(
+                                alignment: message.isUser 
+                                    ? Alignment.centerRight 
+                                    : Alignment.centerLeft,
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: message.isUser
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.white,
+                                    borderRadius: message.isUser
+                                        ? BorderRadius.only(
+                                            topLeft: Radius.circular(20),
+                                            bottomRight: Radius.circular(20),
+                                            bottomLeft: Radius.circular(20),
+                                          )
+                                        : BorderRadius.only(
+                                            topRight: Radius.circular(20),
+                                            topLeft: Radius.circular(20),
+                                            bottomRight: Radius.circular(20),
+                                          ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        spreadRadius: 2,
+                                        blurRadius: 4,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    message.text,
+                                    style: TextStyle(
+                                      color: message.isUser 
+                                          ? Colors.white 
+                                          : Colors.black,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(
                           bottom: 32,
@@ -216,23 +298,35 @@ callGeminiModel() async {
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 8),
-                              _isLoading
-                                  ? Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    )
-                                  : Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: GestureDetector(
-                                        child: Image.asset('assets/send.png'),
-                                        onTap: callGeminiModel,
-                                      ),
+                              if (_isLoading)
+                                Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              else
+                                Row(
+                                  children: [
+                                    // Regular chat button
+                                    IconButton(
+                                      icon: Icon(Icons.send, color: Colors.blue),
+                                      onPressed: _sendRegularMessage,
+                                      tooltip: 'Send regular message',
                                     ),
+                                    // Analytics button
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.analytics,
+                                        color: _isLoadingFirebase ? Colors.grey : Colors.green,
+                                      ),
+                                      onPressed: _isLoadingFirebase ? null : _sendAnalyticsMessage,
+                                      tooltip: 'Send with analytics',
+                                    ),
+                                  ],
+                                ),
                             ],
                           ),
                         ),

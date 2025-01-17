@@ -7,16 +7,19 @@ import 'package:mpbasic/pages/analytics.dart';
 import 'package:mpbasic/pages/process.dart';
 import 'package:mpbasic/pages/ai.dart';
 import 'package:mpbasic/pages/alerts.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'dashboard_widget.dart'; // Import the DashboardWidget
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
+
   List<CategoryModel> categories = [];
   bool _showGreenPlan = false;
   int _currentImageIndex = 0;
@@ -52,7 +55,7 @@ class _HomePageState extends State<HomePage> {
       case 'Home':
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => HomePage()),
           (route) => false,
         );
         break;
@@ -244,13 +247,15 @@ class _HomePageState extends State<HomePage> {
         drawer: DrawerWidget(navigateToPage: _navigateToPage),
         body: Stack(
           children: [
-            const BackgroundWidget(),
+            BackgroundWidget(),
             SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   SizedBox(height: 100),
-                  DashboardWidget(), // Add the DashboardWidget here
+                  DashboardWidget(
+                    databaseReference: databaseReference,
+                  ), // Add the DashboardWidget here
                 ],
               ),
             ),

@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 class BottomAppBarWidget extends StatelessWidget {
   final Function(String, BuildContext) navigateToPage;
 
-  const BottomAppBarWidget({Key? key, required this.navigateToPage})
-      : super(key: key);
+  const BottomAppBarWidget({super.key, required this.navigateToPage});
 
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
       color: Colors.transparent,
       elevation: 0,
-      child: Container(
+      child: SizedBox(
         height: 70,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

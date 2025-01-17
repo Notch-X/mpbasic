@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+
 class AlertPage extends StatefulWidget {
   const AlertPage({super.key});
 
@@ -83,6 +84,7 @@ class _AlertPageState extends State<AlertPage> {
     if (availabilityValue >= 60) return Colors.orange;
     return Colors.red;
   }
+  
 
   String _formatDuration(int minutes) {
     int hours = minutes ~/ 60;

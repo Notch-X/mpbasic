@@ -4,8 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 class QualityWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
 
-  const QualityWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const QualityWidget({super.key, required this.databaseReference});
 
   Color _getQualityColor(dynamic value) {
     double qualityValue = double.tryParse(value.toString()) ?? 0;
@@ -108,8 +107,7 @@ class QualityWidget extends StatelessWidget {
 class QualityDetailsWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
 
-  const QualityDetailsWidget({Key? key, required this.databaseReference})
-      : super(key: key);
+  const QualityDetailsWidget({super.key, required this.databaseReference});
 
   @override
   Widget build(BuildContext context) {

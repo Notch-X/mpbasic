@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mpbasic/pages/home.dart';
 
 class Onboarding extends StatelessWidget {
-  const Onboarding({Key? key}) : super(key: key);
+  const Onboarding({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class Onboarding extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Column(
-              children: [
+              children: const [
                 Text(
                   'Smart Eco Saline',
                   style: TextStyle(
@@ -36,7 +36,7 @@ class Onboarding extends StatelessWidget {
             ),
             SizedBox(height: 32),
             Image.asset(
-              'assets/onboarding.png', // Image reflecting the saline theme
+              'assets/images/onboarding_2.png', // Image reflecting the saline theme
               height: 250,
             ),
             SizedBox(height: 32),
@@ -44,7 +44,7 @@ class Onboarding extends StatelessWidget {
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => const HomePage()),
+                  MaterialPageRoute(builder: (context) => HomePage()),
                   (route) => false,
                 );
               },
@@ -53,11 +53,12 @@ class Onboarding extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                 ),
                 padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                backgroundColor: Colors.purple, // Button background color set to purple
+                backgroundColor:
+                    Colors.purple, // Button background color set to purple
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [
+                children: const [
                   Text(
                     'Get Started',
                     style: TextStyle(
