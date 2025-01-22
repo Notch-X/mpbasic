@@ -217,8 +217,10 @@ class _TempPHDetailsWidgetState extends State<TempPHDetailsWidget> {
       if (event.snapshot.value != null) {
         final data = Map<String, dynamic>.from(event.snapshot.value as Map);
 
+        // Fix temperature parsing to match the data structure
+        final temperatureData = data['Temperature'] as Map<Object?, Object?>?;
         final temperatureValue =
-            double.tryParse(data['Temperature'].toString()) ?? 0.0;
+            double.tryParse((temperatureData?['value'] ?? 0).toString()) ?? 0.0;
         final phValue = double.tryParse(data['pH'].toString()) ?? 0.0;
 
         final now = DateTime.now();
