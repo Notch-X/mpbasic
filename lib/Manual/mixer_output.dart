@@ -2,12 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:mpbasic/config.dart'; // Import the configuration file
 
 Future<void> sendMixerOutputValveStateToFlask(
     String control, bool state, BuildContext context) async {
   try {
     final url = Uri.parse(
-        'http://10.0.2.2:5000/mixer_output'); // Update the URL to match your Flask endpoint
+        '${Config.baseUrl}/mixer_output'); // Use the baseUrl from the configuration file
 
     final response = await http
         .post(

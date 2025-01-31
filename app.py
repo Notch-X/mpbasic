@@ -24,7 +24,7 @@ mode_nodes = {
     "diluent_valve": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Diluent_Valve"),
     "stock_mixer": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Stock_Mixer"),
     "diluent_mixer": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Diluent_Mixer_Valve"),
-    "stock_mixerur_valve": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Stock_Mixer_Valve"),
+    "stock_mixer_valve": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Stock_Mixer_Valve"),
     "mixer_tank": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Mixer_Tank_Mixer"),
     "mixer_output": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Mixer_Output_Valve"),
     "mixer_bottle": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Mixer_To_Bottle"),
@@ -41,7 +41,10 @@ mode_nodes = {
     "bottle_valve10": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Valve10"),
     "v18_valve": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Waste_Valve1"),
     "v19_valve": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Waste_Valve2"),
-    "bottle_tray": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Tray_Waste"),
+    "v15_valve": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIO.EXT_PB_Bottle_Tray_Waste"),
+    "45con": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIo.EXT_Conc_pt45p_PB"),
+    "3con": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIo.EXT_Conc_3p_PB"), 
+    "9con": opcua_client.get_node("ns=4;s=|var|Turck/ARM/WinCE TV.Application.GVL_ThirdPartyIo.EXT_Conc_pt9p_PB"),
 }
 
 def set_mode_state(mode, state):
@@ -84,6 +87,26 @@ def control_mode():
                 set_mode_state("stop", False),
                 set_mode_state("manual", True)
             ])
+
+        concentration = data.get('concentration', '')
+        if concentration == '0.45%':
+            success = success and all([
+                set_mode_state("45con", True),
+                set_mode_state("3con", False),
+                set_mode_state("9con", False)
+            ])
+        elif concentration == '3%':
+            success = success and all([
+                set_mode_state("45con", False),
+                set_mode_state("3con", True),
+                set_mode_state("9con", False)
+            ])
+        elif concentration == '0.95%':
+            success = success and all([
+                set_mode_state("45con", False),
+                set_mode_state("3con", False),
+                set_mode_state("9con", True)
+            ])
         
         if success:
             return jsonify({
@@ -111,11 +134,10 @@ def health_check():
 # Dynamically create routes for each valve
 valve_routes = [
     "supply_pump", "stock_valve", "diluent_valve", "stock_mixer", "diluent_mixer",
-    "stock_mixerur_valve", "mixer_tank", "mixer_output", "mixer_bottle", "mixer_pump",
+    "stock_mixer_valve", "mixer_tank", "mixer_output", "mixer_bottle", "mixer_pump",
     "bottle_valve1", "bottle_valve2", "bottle_valve3", "bottle_valve4", "bottle_valve5",
     "bottle_valve6", "bottle_valve7", "bottle_valve8", "bottle_valve9", "bottle_valve10",
-    "v18_valve", "v19_valve", "bottle_tray"
-]
+    "v18_valve", "v19_valve", "v15_valve", "45con", "3con", "9con"]
 
 def create_control_valve_route(route):
     def control_valve():

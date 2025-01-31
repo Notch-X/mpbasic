@@ -61,7 +61,6 @@ class _ManualModePageState extends State<ManualModePage> {
         'Diluent Mixer Valve',
         'Stock Mixer Valve',
         'Mixer Tank Valve',
-        'Mixer',
         'Mixer Output Valve'
       ]
     },
@@ -91,8 +90,8 @@ class _ManualModePageState extends State<ManualModePage> {
     {
       'id': 6,
       'title': 'Waste Tank',
-      'controls': ['Waste Valve 1']
-    }
+      'controls': ['Bottle Tray']
+    } 
   ];
 
   void handleControlToggle(int moduleId, String control) {
