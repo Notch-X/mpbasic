@@ -48,7 +48,7 @@ class _AIChatbotPageState extends ConsumerState<AIChatbotPage> {
       case 'Home':
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => HomePage()),
           (route) => false,
         );
         break;
