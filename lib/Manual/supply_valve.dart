@@ -2,12 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:mpbasic/config.dart'; // Import the configuration file
 
 Future<void> sendSupplyValveStateToFlask(
     String control, bool state, BuildContext context) async {
   try {
     final url = Uri.parse(
-        'http://10.0.2.2:5000/supply_pump'); // Update the URL to match your Flask endpoint
+        '${Config.baseUrl}/supply_pump'); // Use the baseUrl from the configuration file
 
     final response = await http
         .post(

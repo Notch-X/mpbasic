@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:mpbasic/config.dart';
 import 'package:mpbasic/pages/UI/UX/bottom_app_bar_widget.dart';
 import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
 import 'package:mpbasic/pages/home.dart';
 import 'package:mpbasic/pages/ai.dart';
-import 'package:mpbasic/pages/alerts.dart';
 import 'package:mpbasic/pages/analytics.dart';
 import 'package:mpbasic/pages/manual_mode.dart';
 
@@ -41,12 +41,11 @@ class _ProcessPageState extends State<ProcessPage> {
   bool isButton1Toggled = false;
   bool isButton2Toggled = false;
   bool isButton3Toggled = false;
+  String selectedConcentration = '';
 
   Future<void> sendStateToFlask() async {
     try {
-      //final url = Uri.parse('http://10.0.2.2:5000'); // IP address for mobile emulator
-      // final url = Uri.parse('http://10.64.27.251:5000'); // IP address for Clarence andriod
-      final url = Uri.parse('http: //192.168.250.122:5000');
+      final url = Config.baseUrl;
 
       final response = await http
           .post(
@@ -56,6 +55,8 @@ class _ProcessPageState extends State<ProcessPage> {
           'button1': isButton1Toggled,
           'button2': isButton2Toggled,
           'button3': isButton3Toggled,
+          'concentration':
+              selectedConcentration.isNotEmpty ? selectedConcentration : null,
         }),
       )
           .timeout(
@@ -102,6 +103,14 @@ class _ProcessPageState extends State<ProcessPage> {
       if (buttonNumber == 1) isButton1Toggled = true;
       if (buttonNumber == 2) isButton2Toggled = true;
       if (buttonNumber == 3) isButton3Toggled = true;
+    });
+
+    sendStateToFlask();
+  }
+
+  void updateConcentration(String concentration) {
+    setState(() {
+      selectedConcentration = concentration;
     });
 
     sendStateToFlask();
@@ -235,13 +244,23 @@ class _ProcessPageState extends State<ProcessPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'System Controls',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: const [
+              Icon(
+                Icons.settings,
+                color: Colors.white,
+                size: 24,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'System Controls',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
           _buildControlButton(
@@ -267,6 +286,8 @@ class _ProcessPageState extends State<ProcessPage> {
             },
             icon: Icons.handyman,
           ),
+          const SizedBox(height: 24),
+          _buildConcentrationPanel(),
         ],
       ),
     );
@@ -331,6 +352,79 @@ class _ProcessPageState extends State<ProcessPage> {
     );
   }
 
+  Widget _buildConcentrationPanel() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              Icon(
+                Icons.science,
+                color: Colors.white,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Concentration Control',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          GridView.count(
+            shrinkWrap: true,
+            crossAxisCount: 3,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 2.0,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              _buildConcentrationOption('0.45%'),
+              _buildConcentrationOption('0.95%'),
+              _buildConcentrationOption('3%'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConcentrationOption(String concentration) {
+    final isSelected = selectedConcentration == concentration;
+    return ElevatedButton(
+      onPressed: () => updateConcentration(concentration),
+      style: ElevatedButton.styleFrom(
+        backgroundColor:
+            isSelected ? const Color(0xFF66C7C7) : Colors.grey.withOpacity(0.3),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 8,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: Text(
+        concentration,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          fontSize: 14,
+        ),
+      ),
+    );
+  }
+
   void _navigateToPage(String route, BuildContext context) {
     switch (route) {
       case 'Home':
@@ -357,12 +451,6 @@ class _ProcessPageState extends State<ProcessPage> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AnalyticsPage()),
-        );
-        break;
-      case 'Alerts':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AlertPage()),
         );
         break;
       case 'Manual':

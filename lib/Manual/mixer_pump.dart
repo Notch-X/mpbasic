@@ -2,19 +2,24 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:mpbasic/config.dart'; // Import the configuration file
 
-Future<void> sendMixerPumpStateToFlask(String control, bool state, BuildContext context) async {
+Future<void> sendMixerPumpStateToFlask(
+    String control, bool state, BuildContext context) async {
   try {
-    final url = Uri.parse('http://10.0.2.2:5000/mixer_pump'); // Update the URL to match your Flask endpoint
+    final url = Uri.parse(
+        '${Config.baseUrl}/mixer_pump'); // Use the baseUrl from the configuration file
 
-    final response = await http.post(
+    final response = await http
+        .post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'control': control,
         'state': state,
       }),
-    ).timeout(
+    )
+        .timeout(
       const Duration(seconds: 5),
       onTimeout: () {
         throw TimeoutException('Connection timed out');
@@ -25,7 +30,8 @@ Future<void> sendMixerPumpStateToFlask(String control, bool state, BuildContext 
       print('Response from Flask: ${response.body}');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Mixer Pump control updated successfully')),
+          const SnackBar(
+              content: Text('Mixer Pump control updated successfully')),
         );
       }
     } else {
@@ -41,7 +47,8 @@ Future<void> sendMixerPumpStateToFlask(String control, bool state, BuildContext 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Connection error. Please check if the server is running.'),
+          content:
+              Text('Connection error. Please check if the server is running.'),
         ),
       );
     }

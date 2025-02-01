@@ -9,7 +9,6 @@ import 'package:mpbasic/pages/UI/UX/drawer_widget.dart';
 import 'package:mpbasic/pages/analytics.dart';
 import 'package:mpbasic/pages/process.dart';
 import 'package:mpbasic/pages/home.dart';
-import 'package:mpbasic/pages/alerts.dart';
 import 'package:mpbasic/pages/message.dart';
 import 'package:mpbasic/pages/themesNotifier.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -68,12 +67,6 @@ class _AIChatbotPageState extends ConsumerState<AIChatbotPage> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AIChatbotPage()),
-        );
-        break;
-      case 'Alerts':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AlertPage()),
         );
         break;
     }

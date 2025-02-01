@@ -29,8 +29,6 @@ class BottomAppBarWidget extends StatelessWidget {
             ),
             buildBottomNavItem(
                 Icons.chat_bubble, () => navigateToPage('Chat', context)),
-            buildBottomNavItem(
-                Icons.notifications, () => navigateToPage('Alerts', context)),
           ],
         ),
       ),
