@@ -53,7 +53,9 @@ class EnvironmentMonitorWidget extends StatelessWidget {
         if (snapshot.hasData && snapshot.data?.snapshot.value != null) {
           final data =
               Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
-          final temperatureValue = data['Temperature'] ?? 0;
+          final temperatureData = data['Temperature'] as Map<Object?, Object?>?;
+          // Parse the nested value field specifically
+          final temperatureValue = temperatureData?['value'] ?? 0;
           final phValue = data['pH'] ?? 0;
           final temperatureColor = _getTemperatureColor(temperatureValue);
           final phColor = _getPHColor(phValue);
@@ -90,7 +92,7 @@ class EnvironmentMonitorWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        '${double.parse(temperatureValue.toString()).toStringAsFixed(1)}°C',
+                        '${temperatureValue}°C',
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
