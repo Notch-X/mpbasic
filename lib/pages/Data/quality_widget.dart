@@ -81,7 +81,7 @@ class QualityWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  '${qualityValue.toString()}%',
+                  '${qualityValue.toStringAsFixed(2)}%',
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,

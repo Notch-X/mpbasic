@@ -73,7 +73,7 @@ class EnergyKWWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  '${energyvalue.toString()}%',
+                  '${energyvalue.toStringAsFixed(2)}%',
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,

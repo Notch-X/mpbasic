@@ -137,7 +137,6 @@ class _AnalyticsPageState extends State<AnalyticsPage>
           MaterialPageRoute(builder: (context) => const AnalyticsPage()),
         );
         break;
-    
     }
   }
 
@@ -381,7 +380,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
     }
     if (_selectedSection == 3 &&
         subpage['title'] == 'Overall Equipment Effectiveness') {
-      return OEETimeSeriesWidget(databaseReference: _databaseReference);
+      return OEEDetailsWidget(databaseReference: _databaseReference);
     }
 
     return Card(

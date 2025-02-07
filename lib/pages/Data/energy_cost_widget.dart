@@ -78,7 +78,7 @@ class EnergyCostWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  '${eCost.toString()} SGD',
+                  '${eCost.toStringAsFixed(2)} SGD',
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,

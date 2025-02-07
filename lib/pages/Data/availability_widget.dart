@@ -46,7 +46,8 @@ class AvailabilityWidget extends StatelessWidget {
         if (snapshot.hasData && snapshot.data?.snapshot.value != null) {
           final data =
               Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
-          final availabilityValue = data['Availability'] ?? 0;
+          final availabilityValue =
+              (data['Availability'] ?? 0.0).toStringAsFixed(2);
           final color = _getAvailabilityColor(availabilityValue);
           return Container(
             width: double.infinity,

@@ -80,7 +80,7 @@ class PerformanceWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  '${performanceValue.toString()}%',
+                  '${performanceValue.toStringAsFixed(2)}%',
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,

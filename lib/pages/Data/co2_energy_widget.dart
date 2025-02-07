@@ -78,7 +78,7 @@ class CO2Widget extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  '${co2TotalValue.toString()} kg',
+                  '${co2TotalValue.toStringAsFixed(2)} kg',
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,

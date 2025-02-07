@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:async';
 
 class EnvironmentMonitorWidget extends StatelessWidget {
   final DatabaseReference databaseReference;
   const EnvironmentMonitorWidget({super.key, required this.databaseReference});
+
   Color _getTemperatureColor(dynamic value) {
     double temperatureValue = double.tryParse(value.toString()) ?? 0;
     if (temperatureValue <= 0) return Colors.blue;
@@ -28,12 +28,13 @@ class EnvironmentMonitorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: databaseReference.child('set').onValue,
-      builder: (context, snapshot) {
+      builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(color: Colors.blue),
           );
         }
+
         if (snapshot.hasError) {
           return Center(
             child: Container(
@@ -50,142 +51,158 @@ class EnvironmentMonitorWidget extends StatelessWidget {
             ),
           );
         }
-        if (snapshot.hasData && snapshot.data?.snapshot.value != null) {
-          final data =
-              Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
-          final temperatureData = data['Temperature'] as Map<Object?, Object?>?;
-          // Parse the nested value field specifically
-          final temperatureValue = temperatureData?['value'] ?? 0;
-          final phValue = data['pH'] ?? 0;
-          final temperatureColor = _getTemperatureColor(temperatureValue);
-          final phColor = _getPHColor(phValue);
-          return Row(
-            children: [
-              // Temperature
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        temperatureColor.withOpacity(0.1),
-                        Colors.transparent,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: temperatureColor.withOpacity(0.5),
-                      width: 2,
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Temperature',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        '${temperatureValue}°C',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          color: temperatureColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              // pH
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        phColor.withOpacity(0.1),
-                        Colors.transparent,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: phColor.withOpacity(0.5),
-                      width: 2,
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              'pH',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              phValue.toStringAsFixed(2),
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                color: phColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 30,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                phColor.withOpacity(0.1),
-                                Colors.transparent,
-                              ],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                            ),
-                          ),
-                          child: Align(
-                            alignment: Alignment((phValue - 5) / 5, 0),
-                            child: Icon(
-                              Icons.arrow_drop_down,
-                              color: phColor,
-                              size: 30,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+
+        if (!snapshot.hasData || snapshot.data?.snapshot.value == null) {
+          return const Center(
+            child: Text(
+              'No data available',
+              style: TextStyle(fontSize: 18, color: Colors.white),
+            ),
           );
         }
-        return const Center(
-          child: Text(
-            'No data available',
-            style: TextStyle(fontSize: 18, color: Colors.white),
-          ),
+
+        // Safe data parsing
+        final data =
+            Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
+
+        // Extract temperature value directly like pH
+        final tempData = data['Temperature'];
+        final double tempDouble = double.tryParse(tempData.toString()) ?? 0.0;
+
+        // Extract pH value
+        final phData = data['pH'];
+        final double phDouble = double.tryParse(phData.toString()) ?? 0.0;
+
+        // Format to 2 decimal places
+        final formattedTemp = tempDouble.toStringAsFixed(2);
+        final formattedPH = phDouble.toStringAsFixed(2);
+
+        final temperatureColor = _getTemperatureColor(tempDouble);
+        final phColor = _getPHColor(phDouble);
+
+        return Row(
+          children: [
+            // Temperature
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      temperatureColor.withOpacity(0.1),
+                      Colors.transparent,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: temperatureColor.withOpacity(0.5),
+                    width: 2,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Temperature',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '${formattedTemp}°C',
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: temperatureColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            // pH
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      phColor.withOpacity(0.1),
+                      Colors.transparent,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: phColor.withOpacity(0.5),
+                    width: 2,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'pH',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            formattedPH,
+                            style: TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: phColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: 30,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              phColor.withOpacity(0.1),
+                              Colors.transparent,
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                        child: Align(
+                          alignment: Alignment(
+                              ((phDouble - 5) / 5).clamp(-1.0, 1.0), 0),
+                          child: Icon(
+                            Icons.arrow_drop_down,
+                            color: phColor,
+                            size: 30,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -213,35 +230,31 @@ class _TempPHDetailsWidgetState extends State<TempPHDetailsWidget> {
   }
 
   void _startContinuousLogging() {
-    // Listen to real-time updates from the 'set' path
     _dataSubscription =
         widget.databaseReference.child('set').onValue.listen((event) {
       if (event.snapshot.value != null) {
         final data = Map<String, dynamic>.from(event.snapshot.value as Map);
 
-        // Fix temperature parsing to match the data structure
-        final temperatureData = data['Temperature'] as Map<Object?, Object?>?;
-        final temperatureValue =
-            double.tryParse((temperatureData?['value'] ?? 0).toString()) ?? 0.0;
-        final phValue = double.tryParse(data['pH'].toString()) ?? 0.0;
+        // Parse temperature directly like pH
+        final tempData = data['Temperature'];
+        final double tempDouble = double.tryParse(tempData.toString()) ?? 0.0;
+
+        // Parse pH
+        final phData = data['pH'];
+        final double phDouble = double.tryParse(phData.toString()) ?? 0.0;
 
         final now = DateTime.now();
 
         setState(() {
-          // Add new data points
-          _addDataPoint(_temperatureData, now, temperatureValue, 50);
-          _addDataPoint(_phData, now, phValue, 50);
+          _addDataPoint(_temperatureData, now, tempDouble, 50);
+          _addDataPoint(_phData, now, phDouble, 50);
         });
 
-        // Log data to Firebase history
-        _logEnvironmentData(temperatureValue, phValue);
+        _logEnvironmentData(tempDouble, phDouble);
       }
     });
 
-    // Set up a timer to ensure periodic updates
-    _loggingTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      // Additional refresh logic if needed
-    });
+    _loggingTimer = Timer.periodic(const Duration(seconds: 3), (_) {});
   }
 
   void _addDataPoint(
@@ -250,18 +263,16 @@ class _TempPHDetailsWidgetState extends State<TempPHDetailsWidget> {
         ? TemperatureData(timestamp, value)
         : PHData(timestamp, value));
 
-    // Limit the number of data points
     if (dataList.length > maxPoints) {
       dataList.removeAt(0);
     }
   }
 
   void _logEnvironmentData(double temperature, double ph) {
-    // Log to Firebase history
     widget.databaseReference.child('environment_history').push().set({
       'timestamp': ServerValue.timestamp,
-      'Temperature': temperature,
-      'pH': ph,
+      'Temperature': temperature.toStringAsFixed(2),
+      'pH': ph.toStringAsFixed(2),
     });
   }
 
@@ -271,7 +282,6 @@ class _TempPHDetailsWidgetState extends State<TempPHDetailsWidget> {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          // Temperature Chart
           _buildChart(
             title: 'Temperature Over Time',
             data: _temperatureData,
@@ -280,7 +290,6 @@ class _TempPHDetailsWidgetState extends State<TempPHDetailsWidget> {
             unit: '°C',
           ),
           const SizedBox(height: 16),
-          // pH Chart
           _buildChart(
             title: 'pH Level Over Time',
             data: _phData,
@@ -360,6 +369,7 @@ class _TempPHDetailsWidgetState extends State<TempPHDetailsWidget> {
                 reservedSize: 30,
                 interval: 1,
                 getTitlesWidget: (value, meta) {
+                  if (value.toInt() >= data.length) return const Text('');
                   final DateTime timestamp = data[value.toInt()].timestamp;
                   return Text(
                     '${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}',
@@ -374,7 +384,7 @@ class _TempPHDetailsWidgetState extends State<TempPHDetailsWidget> {
                 interval: data == _temperatureData ? 5 : 0.5,
                 getTitlesWidget: (value, meta) {
                   return Text(
-                    '${value.toStringAsFixed(1)}$unit',
+                    value.toStringAsFixed(2) + unit,
                     style: const TextStyle(color: Colors.white70, fontSize: 10),
                   );
                 },
@@ -389,7 +399,10 @@ class _TempPHDetailsWidgetState extends State<TempPHDetailsWidget> {
           lineBarsData: [
             LineChartBarData(
               spots: data.asMap().entries.map((entry) {
-                return FlSpot(entry.key.toDouble(), entry.value.value);
+                return FlSpot(
+                  entry.key.toDouble(),
+                  entry.value.value,
+                );
               }).toList(),
               isCurved: true,
               gradient: LinearGradient(
@@ -437,7 +450,6 @@ class _TempPHDetailsWidgetState extends State<TempPHDetailsWidget> {
   }
 }
 
-// Data classes remain the same as in the original file
 class TemperatureData {
   final DateTime timestamp;
   final double value;

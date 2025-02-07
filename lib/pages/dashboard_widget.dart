@@ -143,14 +143,16 @@ class DashboardWidget extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               _buildMetricCard(
-                  'Total Energy',
-                  '${set['kWh']?.toString() ?? '0'} kWh',
-                  Icons.bolt,
-                  Colors.yellow),
+                'Total Energy',
+                '${(set['kWh'] ?? 0.0).toStringAsFixed(2)} kWh',
+                Icons.bolt,
+                Colors.yellow,
+              ),
+
               const SizedBox(height: 8),
               _buildMetricCard(
                   'Total Compressed Air',
-                  '${set['Total Compressed Air']?.toString() ?? '0'} Pa',
+                  '${(set['Total Compressed Air'] ?? 0.0).toStringAsFixed(2)} Pa',
                   Icons.air,
                   Colors.blue),
 
@@ -167,13 +169,13 @@ class DashboardWidget extends StatelessWidget {
               const SizedBox(height: 12),
               _buildMetricCard(
                   'Carbon Expense',
-                  '${set['kWh Cost']?.toString() ?? '0'} SGD',
+                  '${(set['kWh Cost'] ?? 0.0).toStringAsFixed(2)} SGD',
                   Icons.attach_money,
                   Colors.green),
               const SizedBox(height: 8),
               _buildMetricCard(
                   'Carbon Emission',
-                  '${set['CO2 Total']?.toString() ?? '0'} TONS',
+                  '${(set['CO2 Total'] ?? 0.0).toStringAsFixed(2)} TONS',
                   Icons.cloud,
                   Colors.grey),
 
@@ -201,18 +203,23 @@ class DashboardWidget extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         _buildPerformanceIndicator(
-                            'Availability',
-                            double.parse(
-                                set['Availability']?.toString() ?? '0'),
-                            Colors.green),
+                          'Availability',
+                          double.parse(
+                              (set['Availability'] ?? 0.0).toStringAsFixed(2)),
+                          Colors.green,
+                        ),
                         _buildPerformanceIndicator(
-                            'Performance',
-                            double.parse(set['Performance']?.toString() ?? '0'),
-                            Colors.blue),
+                          'Performance',
+                          double.parse(
+                              (set['Performance'] ?? 0.0).toStringAsFixed(2)),
+                          Colors.blue,
+                        ),
                         _buildPerformanceIndicator(
-                            'Quality',
-                            double.parse(set['Quality']?.toString() ?? '0'),
-                            Colors.orange),
+                          'Quality',
+                          double.parse(
+                              (set['Quality'] ?? 0.0).toStringAsFixed(2)),
+                          Colors.orange,
+                        ),
                       ],
                     ),
                   ],
